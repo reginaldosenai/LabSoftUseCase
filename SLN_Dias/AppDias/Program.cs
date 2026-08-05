@@ -13,6 +13,9 @@ class Program
         Console.Write("Digite o nome da tarefa: ");
         string nome = Console.ReadLine() ?? "Sem nome";
 
+        Console.WriteLine("Digite o nome do funcionário responsável: ");
+        string funcionario = Console.ReadLine() ?? "Não informado";
+
         Console.Write("Digite a data de início (dd/mm/aaaa): ");
         string dataInicioStr = Console.ReadLine() ?? "";
         DateTime dataInicio = DateTime.Parse(dataInicioStr);
@@ -21,10 +24,11 @@ class Program
         string dataFimStr = Console.ReadLine() ?? "";
         DateTime dataFim = DateTime.Parse(dataFimStr);
 
-        Tarefa tarefa = new Tarefa(nome, dataInicio, dataFim);
+        Tarefa tarefa = new Tarefa(nome, funcionario, dataInicio, dataFim);
 
         Console.WriteLine("\\n--- RESUMO DA TAREFA ---");
         Console.WriteLine($"Tarefa: {tarefa.Nome}");
+        Console.WriteLine($"Responsável: {tarefa.NomeFuncionario}");
         Console.WriteLine($"Início: {tarefa.DataInicio:dd/MM/yyyy}");
         Console.WriteLine($"Término: {tarefa.DataFim:dd/MM/yyyy}");
         Console.WriteLine($"Duração: {tarefa.ObterQuantidadeDias()} dias");
