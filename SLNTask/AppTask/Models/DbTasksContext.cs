@@ -15,7 +15,13 @@ public partial class DbTasksContext : DbContext
     {
     }
 
+    public virtual DbSet<CentralCusto> CentralCustos { get; set; }
+
+    public virtual DbSet<Departamento> Departamentos { get; set; }
+
     public virtual DbSet<Funcionario> Funcionarios { get; set; }
+
+    public virtual DbSet<Incidente> Incidentes { get; set; }
 
     public virtual DbSet<Tarefa> Tarefas { get; set; }
 
@@ -24,9 +30,33 @@ public partial class DbTasksContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<CentralCusto>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__CentralC__3213E83FD63C96D6");
+
+            entity.ToTable("CentralCusto");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Nomecusto).IsUnicode(false);
+            entity.Property(e => e.ValorAnualMeta).HasColumnType("decimal(10, 2)");
+        });
+
+        modelBuilder.Entity<Departamento>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Departam__3213E83F504724E7");
+
+            entity.ToTable("Departamento");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Ativo).HasDefaultValue(true);
+            entity.Property(e => e.Descricao)
+                .HasMaxLength(250)
+                .IsUnicode(false);
+        });
+
         modelBuilder.Entity<Funcionario>(entity =>
         {
-            entity.HasKey(e => e.Codigo).HasName("PK__Funciona__06370DADCC2F491C");
+            entity.HasKey(e => e.Codigo).HasName("PK__Funciona__06370DAD1BDFCCF6");
 
             entity.ToTable("Funcionario");
 
@@ -38,9 +68,27 @@ public partial class DbTasksContext : DbContext
                 .IsUnicode(false);
         });
 
+        modelBuilder.Entity<Incidente>(entity =>
+        {
+            entity.HasKey(e => e.Codigo).HasName("PK__Incident__06370DAD0BA0428A");
+
+            entity.ToTable("Incidente");
+
+            entity.Property(e => e.DataIncidente).HasColumnType("datetime");
+            entity.Property(e => e.DescricaoProblema)
+                .HasMaxLength(250)
+                .IsUnicode(false);
+            entity.Property(e => e.Resolvido)
+                .HasMaxLength(3)
+                .IsUnicode(false);
+            entity.Property(e => e.Solucao)
+                .HasMaxLength(250)
+                .IsUnicode(false);
+        });
+
         modelBuilder.Entity<Tarefa>(entity =>
         {
-            entity.HasKey(e => e.Codigo).HasName("PK__Tarefa__06370DAD89C1CEB3");
+            entity.HasKey(e => e.Codigo).HasName("PK__Tarefa__06370DAD0B18E8B0");
 
             entity.ToTable("Tarefa");
 
