@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/AppTask.styles.css" asp-append-version="true" />
+    <li class="nav-item">
+    <a class="nav-link text-dark" asp-area="" asp-controller="Funcionario" asp-action="Index">Funcionários</a>
+</li>
 </head>
 <body>
     <header>
@@ -31,8 +34,12 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Tarefa" asp-action="Sobre">Sobre</a>
                         </li>
-
-
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Funcionario" asp-action="Index">Funcionários</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Incidentes" asp-action="Index">Incidentes</a>
+                        </li>
                     </ul>
                 </div>
             </div>
