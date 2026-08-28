@@ -45,6 +45,7 @@ namespace AppTask.Controllers
         // GET: Funcionario/Create
         public IActionResult Create()
         {
+            ViewData["ListaFuncionario"] = new SelectList(_context.Funcionarios, "Codigo", "Nome");
             return View();
         }
 
@@ -53,7 +54,7 @@ namespace AppTask.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Codigo,Nome,Cargo")] Funcionario funcionario)
+        public async Task<IActionResult> Create([Bind("Codigo,Nome,Cargo, CodigoGerente")] Funcionario funcionario)
         {
             if (ModelState.IsValid)
             {
@@ -61,6 +62,7 @@ namespace AppTask.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             return View(funcionario);
         }
 
@@ -77,6 +79,7 @@ namespace AppTask.Controllers
             {
                 return NotFound();
             }
+            ViewData["GerenteId"] = new SelectList(_context.Funcionarios, "Codigo", "Nome", funcionario.CodigoGerente);
             return View(funcionario);
         }
 
@@ -85,7 +88,7 @@ namespace AppTask.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Codigo,Nome,Cargo")] Funcionario funcionario)
+        public async Task<IActionResult> Edit(int id, [Bind("Codigo,Nome,Cargo,CodigoGerente")] Funcionario funcionario)
         {
             if (id != funcionario.Codigo)
             {

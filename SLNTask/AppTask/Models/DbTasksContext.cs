@@ -38,6 +38,13 @@ public partial class DbTasksContext : DbContext
             entity.Property(e => e.Nome)
                 .HasMaxLength(100)
                 .IsUnicode(false);
+
+
+            entity.HasOne(d => d.Gerente)
+            .WithMany() 
+            .HasForeignKey(d => d.CodigoGerente)
+            .HasConstraintName("FK_Funcionario_Gerente");
+
         });
 
         modelBuilder.Entity<Incidente>(entity =>
@@ -56,6 +63,7 @@ public partial class DbTasksContext : DbContext
             entity.Property(e => e.Solucao)
                 .HasMaxLength(250)
                 .IsUnicode(false);
+
         });
 
         modelBuilder.Entity<Tarefa>(entity =>
