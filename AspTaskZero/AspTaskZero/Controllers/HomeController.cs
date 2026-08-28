@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using AppTask.Models;
+using AspTaskZero.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AppTask.Controllers
+namespace AspTaskZero.Controllers
 {
     public class HomeController : Controller
     {

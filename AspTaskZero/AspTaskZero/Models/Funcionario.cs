@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AppTask.Models;
+namespace AspTaskZero.Models;
 
 public partial class Funcionario
 {

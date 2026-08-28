@@ -1,4 +1,4 @@
-using AppTask.Models;
+using AspTaskZero.Models;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,8 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDbContext<DbTasksContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("ConexaoSqlServer")));
+builder.Services.AddDbContext<DbTasksZeroContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ConexaoDefault")));
 
 var app = builder.Build();
 

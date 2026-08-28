@@ -5,15 +5,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using AppTask.Models;
+using AspTaskZero.Models;
 
-namespace AppTask.Controllers
+namespace AspTaskZero.Controllers
 {
     public class FuncionarioController : Controller
     {
-        private readonly DbTasksContext _context;
+        private readonly DbTasksZeroContext _context;
 
-        public FuncionarioController(DbTasksContext context)
+        public FuncionarioController(DbTasksZeroContext context)
         {
             _context = context;
         }

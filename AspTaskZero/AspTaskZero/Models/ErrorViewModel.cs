@@ -1,4 +1,4 @@
-namespace AppTask.Models
+namespace AspTaskZero.Models
 {
     public class ErrorViewModel
     {

@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace AppTask.Models;
+namespace AspTaskZero.Models;
 
-public partial class DbTasksContext : DbContext
+public partial class DbTasksZeroContext : DbContext
 {
-    public DbTasksContext()
+    public DbTasksZeroContext()
     {
     }
 
-    public DbTasksContext(DbContextOptions<DbTasksContext> options)
+    public DbTasksZeroContext(DbContextOptions<DbTasksZeroContext> options)
         : base(options)
     {
     }
@@ -26,7 +26,7 @@ public partial class DbTasksContext : DbContext
     {
         modelBuilder.Entity<Funcionario>(entity =>
         {
-            entity.HasKey(e => e.Codigo).HasName("PK__Funciona__06370DADCC2F491C");
+            entity.HasKey(e => e.Codigo).HasName("PK__Funciona__06370DAD99604F21");
 
             entity.ToTable("Funcionario");
 
@@ -40,7 +40,7 @@ public partial class DbTasksContext : DbContext
 
         modelBuilder.Entity<Tarefa>(entity =>
         {
-            entity.HasKey(e => e.Codigo).HasName("PK__Tarefa__06370DAD89C1CEB3");
+            entity.HasKey(e => e.Codigo).HasName("PK__Tarefa__06370DAD9C36D693");
 
             entity.ToTable("Tarefa");
 
