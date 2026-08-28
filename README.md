@@ -228,15 +228,3 @@ A classe `dbTasksContext` herda da classe base `DbContext` do Entity Framework C
 
 ---
 
-### 5. Instanciação e Ciclo de Vida de Objetos
-Considere o seguinte trecho de código em um método do Controller:
-
-```csharp
-var novaTarefa = new Tarefa
-{
-    Descricao = "Ajustar regras do CSS",
-    DataPlanejada = DateTime.Now,
-    StatusTarefa = "Pendente",
-    Prazo = "Em dia",
-    FuncionarioId = 1
-};
