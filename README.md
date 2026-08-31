@@ -114,7 +114,23 @@ Exemplo com Autenticação do Windows (Trusted Connection)
 ```
 
 
-## Etapa 5: Registro do DbContext na Injeção de Dependência (Program.cs)
+
+## 🔨 Etapa 5: Engenharia Reversa - scaffolding update database
+Use esse comando para adicionar novas tabelas, se seu projeto já contém a classe context configurada
+no Console de pacote
+
+```json
+Scaffold-DbContext "Name=ConexaoSqlServer" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Force
+```
+
+
+## 🔨 Etapa 6: Compilação Obrigatória da Solução
+Antes de gerar as telas e controllers, o projeto precisa estar limpo e compilado:
+
+- Pressione Ctrl + Shift + B ou clique com o botão direito na Solução e selecione Recompilar (Rebuild).
+
+
+## Etapa 7: Registro do DbContext na Injeção de Dependência (Program.cs)
 
 Para que o gerador de código consiga instanciar o banco sem erros de tempo de execução ou na geração do Scaffolding, registre o contexto no contêiner de dependências do .NET.
 
@@ -136,19 +152,6 @@ builder.Services.AddDbContext<dbTasksContext>(options =>
 var app = builder.Build();
 ```
 
-## 🔨 Etapa 6: Engenharia Reversa - scaffolding update database
-Use esse comando para adicionar novas tabelas, se seu projeto já contém a classe context configurada
-no Console de pacote
-
-```json
-Scaffold-DbContext "Name=ConexaoSqlServer" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Force
-```
-
-
-## 🔨 Etapa 7: Compilação Obrigatória da Solução
-Antes de gerar as telas e controllers, o projeto precisa estar limpo e compilado:
-
-- Pressione Ctrl + Shift + B ou clique com o botão direito na Solução e selecione Recompilar (Rebuild).
 
 
 ## 🎨 Etapa 8: Gerando o CRUD Automático (Scaffolding MVC)
