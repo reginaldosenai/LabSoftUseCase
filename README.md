@@ -15,8 +15,7 @@ Este tutorial guia o aluno, passo a passo, na criação de uma aplicação **ASP
 ## 🛠️ Pré-requisitos
 - Visual Studio 2022 (com suporte ao .NET 9 instado)
 - Microsoft SQL Server e SQL Server Management Studio (SSMS)
-- Extensão **EF Core Power Tools** instalada no Visual Studio:
-  > *Para instalar:* Vá no menu superior **Extensões > Gerenciar Extensões**, pesquise por `EF Core Power Tools`, instale e reinicie o Visual Studio.
+
 
 ---
 
@@ -86,23 +85,8 @@ GO
 
 - Microsoft.VisualStudio.Web.CodeGeneration.Design
 
-## 🔄 Etapa 4: Engenharia Reversa (Reverse Engineering Visual)
 
-1. Clique com o botão direito sobre o seu projeto no Visual Studio.
-2. Navegue até **EF Core Power Tools > Reverse Engineer**.
-3. Clique em **Add** para criar uma nova conexão com o SQL Server:
-   - Digite o nome do seu Servidor (ex: `localhost`, `.\SQLEXPRESS` ou `.\SENAI`).
-   - Selecione o método de autenticação (*Windows Authentication* ou *SQL Server Authentication* com `sa` e senha).
-   - Selecione o banco de dados `dbTasks`.
-   - Clique em **Test Connection** para validar e avance.
-4. Marque as tabelas `Funcionario` e `Tarefa`.
-5. Na tela de configurações:
-   - Verifique o nome do `DbContext` gerado (ex: `dbTasksContext`).
-   - Mantenha as opções padrões marcadas.
-6. Clique em **OK**.
-
-
-## ⚙️ Etapa 5: Configuração da String de Conexão no appsettings.json
+## ⚙️ Etapa 4: Configuração da String de Conexão no appsettings.json
 
 Abra o arquivo appsettings.json na raiz do projeto e configure a propriedade ConnectionStrings.
 
@@ -130,7 +114,7 @@ Exemplo com Autenticação do Windows (Trusted Connection)
 ```
 
 
-## Etapa 6: Registro do DbContext na Injeção de Dependência (Program.cs)
+## Etapa 5: Registro do DbContext na Injeção de Dependência (Program.cs)
 
 Para que o gerador de código consiga instanciar o banco sem erros de tempo de execução ou na geração do Scaffolding, registre o contexto no contêiner de dependências do .NET.
 
@@ -151,6 +135,15 @@ builder.Services.AddDbContext<dbTasksContext>(options =>
 
 var app = builder.Build();
 ```
+
+## 🔨 Etapa 6: Engenharia Reversa - scaffolding update database
+Use esse comando para adicionar novas tabelas, se seu projeto já contém a classe context configurada
+no Console de pacote
+
+```json
+Scaffold-DbContext "Name=ConexaoSqlServer" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Force
+```
+
 
 ## 🔨 Etapa 7: Compilação Obrigatória da Solução
 Antes de gerar as telas e controllers, o projeto precisa estar limpo e compilado:
