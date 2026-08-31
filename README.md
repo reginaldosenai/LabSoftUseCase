@@ -100,7 +100,7 @@ Abra o arquivo appsettings.json na raiz do projeto e configure a propriedade Con
   },
   "AllowedHosts": "*",
   "ConnectionStrings": {
-    "ConexaoDefault": "Server=.\\SENAI; Database=dbTasks; User Id=sa; Password=senai.123; TrustServerCertificate=True;"
+    "ConexaoSqlServer": "Server=.\\SENAI; Database=dbTasksZero; User Id=sa; Password=senai.123; TrustServerCertificate=True;"
   }
 }
 ```
@@ -109,7 +109,7 @@ Exemplo com Autenticação do Windows (Trusted Connection)
 
 ```json
 "ConnectionStrings": {
-  "ConexaoDefault": "Server=localhost; Database=dbTasks; Trusted_Connection=True; TrustServerCertificate=True;"
+  "ConexaoSqlServer": "Server=localhost; Database=dbTasks; Trusted_Connection=True; TrustServerCertificate=True;"
 }
 ```
 
@@ -146,8 +146,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // Registrando o DbContext com a String de Conexão
-builder.Services.AddDbContext<dbTasksContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("ConexaoDefault")));
+builder.Services.AddDbContext<DbTasksZeroContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ConexaoSqlServer")));
 
 var app = builder.Build();
 ```
