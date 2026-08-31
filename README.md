@@ -25,7 +25,7 @@ Abra o **SQL Server Management Studio (SSMS)**, crie o banco de dados e execute 
 ```sql
 CREATE DATABASE dbTasksZero;
 GO
-USE dbTasks;
+USE dbTasksZero;
 GO
 
 -- Tabela Funcionario
