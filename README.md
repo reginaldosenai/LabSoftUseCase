@@ -224,3 +224,29 @@ A classe `dbTasksContext` herda da classe base `DbContext` do Entity Framework C
 
 ---
 
+ # 📝 DESAFIO PRÁTICO
+
+O gestor do Projeto percebeu com a área de negócio que precisa saber quais são os gerentes e quais são as pessoas gerenciadas por um funcionário.
+
+Sua função é implementar essa nova regra de negócio:
+
+- RN01:  um funcionário gerencia vários funcionários e um funcionário só pode ter um gerente por vez.
+
+
+![Texto Alternativo da Imagem](/imagens/der_funcionario.png)
+
+Na ilustração acima observe que a mudança consiste iniciamente na tabela funcionário.
+
+O objetivo final é que ao entrar na tela de cadastrou ou edição de Funcionário, seja possível, informar quem é seu gerente.
+
+Você pode seguir as dicas sequencias a seguir para implementar as alterações
+
+1. Alterar a tabela Funcionario, adicionando o campo GERID
+2. Com uso de constraints fazer a relação do campo GERID com funcionário para garantir que todo gerente seja obrigatoriamente um funcionário.
+3. Adicionar o campo na classes Model Funcionado do projeto
+4. Alterar a classe context para registrar a nova coluna e seu relacionado.
+5. Implementar na controller , métodos create e edit para enviar para as View correspondente a lista de gerentes/funcionarios.
+5. Na View Create e Edit do funcionário adicionar o campo Escolha Gerente, que vai listar todos os funcionarios, que nesse caso será escolhido como gerente.
+
+
+BOA SORTE!
