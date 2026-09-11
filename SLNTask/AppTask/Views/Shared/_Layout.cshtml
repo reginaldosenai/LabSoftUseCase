@@ -1,5 +1,5 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="pt-br">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,6 +7,122 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/AppTask.styles.css" asp-append-version="true" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-body: #0b0f17;          /* Preto Grafite Profundo */
+            --bg-card: #151c28;          /* Azul Noite Elevado */
+            --bg-navbar: #151c28;        /* Superfície da Navbar */
+            --accent-cyan: #38bdf8;      /* Cyan Elétrico */
+            --accent-hover: rgba(56, 189, 248, 0.12);
+            --text-main: #f1f5f9;        /* Texto Branco Suave */
+            --text-muted: #94a3b8;       /* Texto Cinza Azulado */
+            --border-subtle: #243044;    /* Borda sutil de contraste */
+        }
+
+        body {
+            background-color: var(--bg-body) !important;
+            font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !important;
+            color: var(--text-main) !important;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        header .navbar {
+            background-color: var(--bg-navbar) !important;
+            border-bottom: 1px solid var(--border-subtle) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+            padding-top: 0.85rem;
+            padding-bottom: 0.85rem;
+        }
+
+        .navbar-brand {
+            color: var(--accent-cyan) !important;
+            font-weight: 700 !important;
+            font-size: 1.3rem !important;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar-brand::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .navbar-nav .nav-link,
+        .navbar-nav .nav-link.text-dark {
+            color: var(--text-muted) !important;
+            font-weight: 500 !important;
+            padding: 0.5rem 0.9rem !important;
+            border-radius: 8px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link.text-dark:hover {
+            color: var(--accent-cyan) !important;
+            background-color: var(--accent-hover) !important;
+            transform: translateY(-1px);
+        }
+
+        .navbar-toggler {
+            border-color: var(--border-subtle) !important;
+            filter: invert(1);
+        }
+
+        main {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 2.5rem;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+            margin-top: 1.5rem;
+            margin-bottom: 2.5rem;
+            color: var(--text-main);
+        }
+
+        main h1, main h2, main h3, main h4 {
+            color: #ffffff !important;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        main p, main span, main td, main th, main label {
+            color: var(--text-main);
+        }
+
+        footer {
+            margin-top: auto;
+            background-color: var(--bg-navbar) !important;
+            border-top: 1px solid var(--border-subtle) !important;
+            padding: 1.2rem 0 !important;
+            color: var(--text-muted) !important;
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--accent-cyan) !important;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -37,8 +153,6 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Incidente" asp-action="Index">Incidente</a>
                         </li>
-
-
                     </ul>
                 </div>
             </div>
@@ -49,10 +163,9 @@
             @RenderBody()            
         </main>
     </div>
-
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2026 - AppTask - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2026 - AppTask - Desenvolvido por <strong>Frank Eliel</strong> (frank.e.santos@aluno.senai.br)
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
