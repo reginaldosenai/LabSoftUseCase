@@ -1196,7 +1196,11 @@ namespace ShopeeMVC.Controllers
     }
 }
 ```
+# 2️⃣7️⃣ Rode o Projeto e verifique as telas `Produto` e `Carrinho`
 
+<img width="1552" height="394" alt="Captura de tela 2026-09-25 143304" src="https://github.com/user-attachments/assets/388ecdaa-e9c9-423d-ac5a-3dfd3bb1b8fd" />
+
+<img width="1234" height="562" alt="Captura de tela 2026-09-25 143255" src="https://github.com/user-attachments/assets/d1f8f5c2-3599-4be5-bdc4-cb6e2d53e7e4" />
 ---
 
 # 🧠 O que foi aprendido?
