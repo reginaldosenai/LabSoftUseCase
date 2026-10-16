@@ -1,284 +1,381 @@
-## 🚀 Guia Prático: Design Patterns C# - IMPLEMENTAÇÃO DO PATTERN PROTOTYPE NA CLÍNICA MÉDICA
+# 🚀 Guia Prático: SISTEMA PETSHOP - AGENDAMENTO DE SERVIÇOS
 
-### 📌 Contexto do Projeto: Sistema Interno da Clínica "Vida & Saúde"
+## 📌 Contexto do Projeto: Sistema de Gestão do PetShop "Patas & Carinho"
 
-Em sistemas de gestão hospitalar e clínica, é comum a criação recorrente de objetos complexos com configurações padronizadas. Criar esses objetos do zero instanciando todas as propriedades repetidamente pode gerar código redundante e gargalos de processamento.
+O PetShop "Patas & Carinho" precisa informatizar o atendimento de serviços prestados aos pets para melhorar a organização da agenda diária. Atualmente, os tutores/clientes ligam ou vão presencialmente ao estabelecimento para agendar atendimentos de especialidades veterinárias e procedimentos gerais.
 
-Nesta atividade, você desenvolverá uma aplicação Console em C# (.NET 9) aplicando o padrão de projeto Prototype de forma 100% manual. Criaremos nossos próprios métodos para copiar os objetos, instanciando novas classes diretamente com o operador new para entender perfeitamente o que acontece na memória do computador.
+No sistema, um **Cliente** cadastra seus dados pessoais (Nome, CPF, Telefone e Data de Nascimento). O **Veterinario** possui seu cadastro contendo Nome, CRMV e Especialidade. A **ReservaServico** representa o agendamento em si, onde é registrado o Cliente, o Veterinario responsável pelo atendimento, a Data/Hora agendada, o Valor do serviço informado no momento do agendamento e o Status do atendimento (Ex: Agendada, Realizada, Cancelada).
 
- ![DER](./imagens/conceitoPrototype.png)
+> **Regra do Sistema:** O cliente só consegue realizar uma reserva de serviço se estiver logado. Ao abrir o sistema, a primeira tela apresentada deve ser a de login, contendo também a opção para cadastro de novos clientes.
 
-### 💼 Regra de Negócio: O Problema dos Check-ups e Protocolos Médicos
-A clínica "Vida & Saúde" oferece pacotes de exames padronizados (ex: Check-up Cardiológico Geral, Check-up Admissional, Rotina Pediatria). Cada pacote possui um conjunto fixo de procedimentos, orientações prévias e valores base.
+---
 
-1. Agilidade no Atendimento: Em vez de configurar individualmente cada solicitação de exame com suas dezenas de instruções (ex: "Jejum de 8h", "Chegar 15 min antes"), o atendente deve clonar um pacote modelo já cadastrado.
+## 🛠️ Pré-requisitos
 
-2. Customização Individual: Após a clonagem, o atendente pode personalizar o nome do paciente e adicionar ou remover exames sem alterar o pacote modelo original.
+* Visual Studio 2022 (com suporte ao .NET 9 instalado)
+* Microsoft SQL Server e SQL Server Management Studio (SSMS)
 
-3. Cópia Superficial vs. Cópia Profunda (Shallow vs. Deep Copy): As solicitações contêm uma lista interna de procedimentos. Se duplicarmos apenas o pacote mas compartilharmos a mesma lista, ao alterar os exames de um paciente, alteraremos o modelo base. Precisamos aprender a fazer uma Cópia Profunda (Deep Copy) instanciando novos objetos e uma nova lista do zero.
+---
 
- ![DER](./imagens/prototypemedico.png)
+## 🗄️ Etapa 1: Levantamento de Requisitos Funcionais
 
+Os requisitos funcionais referem-se às regras de negócio da aplicação. Diferenciam-se dos requisitos não funcionais, que tratam das tecnologias empregadas (como linguagem de programação ou banco de dados).
 
+| ID | Requisito | Descrição |
+| :--- | :--- | :--- |
+| **R1** | Cadastro de Clientes | O sistema deve permitir cadastrar, visualizar, atualizar e excluir (CRUD) os dados dos clientes. |
+| **R2** | Cadastro de Veterinários | O sistema deve permitir cadastrar, visualizar, atualizar e excluir (CRUD) os dados dos veterinários (incluindo CRMV e Especialidade). |
+| **R3** | Reserva de Serviço | O sistema deve permitir agendar reservas vinculando obrigatoriamente 1 Cliente e 1 Veterinario a uma data/hora e informando o Valor do serviço. |
+| **R4** | Controle de Status | Toda reserva deve iniciar com o status "Agendada", permitindo alteração para "Realizada" ou "Cancelada". |
+| **R5** | Integridade Relacional | Não deve ser possível excluir um cliente ou veterinário que já possua reservas vinculadas em seu histórico. |
 
-### 🛠️ Pré-requisitos
+---
 
-- Visual Studio 2022 ou VS Code (com .NET 9 SDK instalado)
+## 🗄️ Etapa 2: Diagrama de Entidade e Relacionamento (DER)
 
-- Conhecimentos básicos de POO em C# (Classes, Construtores, Listas e foreach)
+A estrutura do nosso banco de dados contempla as seguintes entidades e relacionamentos:
 
-### 🎯 Objetivos de Aprendizagem
+* **Cliente** (<u>Codigo</u>, Nome, Cpf, Telefone, DataNascimento)
+* **Veterinario** (<u>Codigo</u>, Nome, Crmv, Especialidade)
+* **ReservaServico** (<u>Codigo</u>, DataHora, Valor, StatusServico, ClienteId, VeterinarioId)
 
-1. Compreender o Pattern Prototype: Entender quando e por que clonar objetos existentes.
+> ⚠️ **Atenção Profissional:** No mercado de trabalho, o foco deve ser na entrega do que foi solicitado no escopo. Evite adicionar tabelas ou campos sem o devido alinhamento com sua supervisão.
 
-2. Criar Métodos Manuais de Clonagem: Entender que clonar é simplesmente instanciar um novo objeto (new) e copiar seus valores.
+---
 
-3. Diferenciar Cópia Superficial e Profunda: Compreender a diferença entre copiar um endereço de memória de uma lista e criar uma lista totalmente nova.
+## 🗄️ Etapa 2B: Criação do Banco de Dados via Script SQL
 
-4. Gerenciar Protótipos em Memória: Criar um registro centralizado (Prototype Registry) usando Dicionários (Dictionary<TKey, TValue>)
+Execute o script SQL abaixo no SSMS para criar o banco `dbPetShop`, suas tabelas, chaves primárias/estrangeiras e dados de teste iniciais:
 
-## 📋 Atividade Prática: Passo a Passo
+```sql
+CREATE DATABASE dbPetShop;
+GO
+USE dbPetShop;
+GO
 
-### 📂 Etapa 1: Criando a Classe Procedimento
-### Subtarefa 1.1: Criar a classe Procedimento
-Crie o arquivo Procedimento.cs na pasta Models. Adicionaremos um método manual chamado Clonar() que retorna um novo Procedimento.
+-- Tabela Cliente
+CREATE TABLE Cliente (
+    Codigo INT IDENTITY(1,1) PRIMARY KEY,
+    Nome VARCHAR(100) NOT NULL,
+    Cpf VARCHAR(14) NOT NULL UNIQUE,
+    Telefone VARCHAR(20) NOT NULL,
+    DataNascimento DATE NOT NULL
+);
+GO
+
+-- Tabela Veterinario
+CREATE TABLE Veterinario (
+    Codigo INT IDENTITY(1,1) PRIMARY KEY,
+    Nome VARCHAR(100) NOT NULL,
+    Crmv VARCHAR(20) NOT NULL UNIQUE,
+    Especialidade VARCHAR(50) NOT NULL
+);
+GO
+
+-- Tabela ReservaServico
+CREATE TABLE ReservaServico (
+    Codigo INT IDENTITY(1,1) PRIMARY KEY,
+    DataHora DATETIME NOT NULL,
+    Valor DECIMAL(10,2) NOT NULL,
+    StatusServico VARCHAR(30) NOT NULL,
+    ClienteId INT NOT NULL,
+    VeterinarioId INT NOT NULL,
+    CONSTRAINT FK_ReservaServico_Cliente FOREIGN KEY (ClienteId) 
+        REFERENCES Cliente(Codigo),
+    CONSTRAINT FK_ReservaServico_Veterinario FOREIGN KEY (VeterinarioId) 
+        REFERENCES Veterinario(Codigo)
+);
+GO
+
+-- Inserindo Dados Iniciais para Teste
+INSERT INTO Cliente (Nome, Cpf, Telefone, DataNascimento) VALUES 
+('Maria Oliveira', '111.222.333-44', '(11) 98888-7777', '1990-05-15'),
+('João Souza', '555.666.777-88', '(11) 97777-6666', '1985-10-20');
+
+INSERT INTO Veterinario (Nome, Crmv, Especialidade) VALUES 
+('Dra. Helena Rios', 'CRMV/SP 12345', 'Dermatologia Veterinaria'),
+('Dr. Roberto Alves', 'CRMV/SP 65432', 'Ortopedia Veterinaria');
+
+INSERT INTO ReservaServico (DataHora, Valor, StatusServico, ClienteId, VeterinarioId) VALUES 
+('2026-10-15 14:00:00', 180.00, 'Agendada', 1, 1),
+('2026-10-16 09:30:00', 250.00, 'Agendada', 2, 2);
+GO
+```
+
+### 📁 Importação de Dados via Arquivo CSV (Exemplo: `veterinarios.csv`)
+
+Para praticar a importação de dados no SQL Server via SSMS (menu *Tarefas > Importar Dados* com `Flat File Source`), utilize o modelo CSV abaixo para cadastrar veterinários em lote:
+
+```csv
+Nome,Crmv,Especialidade
+Dra. Camila Mendes,CRMV/SP 11223,Clínica Geral
+Dr. Fernando Costa,CRMV/SP 44556,Oftalmologia Veterinária
+Dra. Patricia Lima,CRMV/SP 77889,Cardiologia Veterinária
+Dr. Marcelo Santos,CRMV/SP 99001,Odontologia Veterinária
+Dra. Juliana Rocha,CRMV/SP 33445,Oncologia Veterinária
+```
+
+---
+
+## 📦 Etapa 3: Criando o Projeto ASP.NET Core no Visual Studio
+
+1. Abra o Visual Studio 2022.
+2. Clique em **Criar um novo projeto**.
+3. Selecione o modelo **Aplicação Web do ASP.NET Core (Model-View-Controller)** e avance.
+4. Nomeie o projeto como `appPetShop`.
+5. Selecione o Framework **.NET 9.0** e clique em **Criar**.
+
+---
+
+## 📦 Etapa 4: Instalação dos Pacotes do Entity Framework via NuGet
+
+Instale os pacotes NuGet adequados à versão do seu projeto (.NET 9):
+
+* `Microsoft.EntityFrameworkCore.SqlServer`
+* `Microsoft.EntityFrameworkCore.Tools`
+* `Microsoft.VisualStudio.Web.CodeGeneration.Design`
+
+---
+
+## ⚙️ Etapa 5: Configuração da String de Conexão no `appsettings.json`
+
+Atualize o arquivo `appsettings.json` com as credenciais do seu banco de dados:
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "ConexaoSqlServer": "Server=.\\SENAI; Database=dbPetShop; User Id=sa; Password=senai.123; TrustServerCertificate=True;"
+  }
+}
+```
+
+---
+
+## 🔨 Etapa 6: Engenharia Reversa (Scaffolding Database First)
+
+Abra o **Console do Gerenciador de Pacotes** e execute o comando abaixo para gerar os Models a partir do banco de dados:
+
+```powershell
+Scaffold-DbContext "Name=ConexaoSqlServer" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Force
+```
+
+> **Ajuste de Nomeclatura:** Caso a classe de contexto seja gerada como `DbPetShopContext` e a model do serviço seja gerada no singular como `ReservaServico`, certifique-se de que os nomes das classes estejam padronizados e alinhados com as tabelas.
+
+---
+
+## 🔨 Etapa 7: Compilação e Registro no `Program.cs`
+
+Recompile a solução (`Ctrl + Shift + B`) e registre o contexto na injeção de dependência no arquivo `Program.cs`:
 
 ```csharp
+using Microsoft.EntityFrameworkCore;
+using appPetShop.Models;
 
-namespace ClinicaPOO.Models
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<DbPetShopContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ConexaoSqlServer")));
+
+var app = builder.Build();
+```
+
+---
+
+## 🎨 Etapa 8: Gerando o CRUD Automático (Scaffolding MVC)
+
+1. Na pasta `Controllers`, clique com o botão direito > **Adicionar** > **Item do Scaffolding...**
+2. Escolha **Controlador MVC com exibições, usando o Entity Framework**.
+3. Gere os controllers para `Cliente`, `Veterinario` e `ReservaServico`.
+
+---
+
+## 🔒 Etapa 9: Implementando Autenticação por Cookie para Clientes
+
+### 1. View Model de Login (`LoginViewModel.cs`)
+
+```csharp
+using System.ComponentModel.DataAnnotations;
+
+namespace appPetShop.Models
 {
-    public class Procedimento
+    public class LoginViewModel
     {
-        public string Nome { get; set; }
-        public decimal Valor { get; set; }
+        [Required(ErrorMessage = "O CPF é obrigatório.")]
+        [Display(Name = "CPF do Cliente")]
+        public string Cpf { get; set; } = string.Empty;
+    }
+}
+```
 
-        public Procedimento(string nome, decimal valor)
+### 2. Controller de Autenticação (`AccountController.cs`)
+
+```csharp
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using appPetShop.Models;
+
+namespace appPetShop.Controllers
+{
+    public class AccountController : Controller
+    {
+        private readonly DbPetShopContext _context;
+
+        public AccountController(DbPetShopContext context)
         {
-            Nome = nome;
-            Valor = valor;
+            _context = context;
         }
 
-        // Clonagem Manual: Criamos uma NOVA instância usando 'new' com os mesmos dados
-        public Procedimento Clonar()
+        [HttpGet]
+        public IActionResult Login()
         {
-            Procedimento novoProcedimento = new Procedimento(this.Nome, this.Valor);
-            return novoProcedimento;
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "ReservaServico");
+            }
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var cliente = await _context.Clientes
+                .FirstOrDefaultAsync(c => c.Cpf == model.Cpf);
+
+            if (cliente == null)
+            {
+                ModelState.AddModelError("", "CPF não encontrado. Faça seu cadastro primeiro.");
+                return View(model);
+            }
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, cliente.Codigo.ToString()),
+                new Claim(ClaimTypes.Name, cliente.Nome),
+                new Claim("CPF", cliente.Cpf)
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity));
+
+            return RedirectToAction("Index", "ReservaServico");
+        }
+
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login");
         }
     }
 }
-
 ```
 
-### 📂 Etapa 2: Implementando a Classe PacoteExame
-### Subtarefa 2.1: Criar a classe PacoteExame
-
-Crie o arquivo PacoteExame.cs na pasta Models. Aqui implementaremos manualmente a Cópia Profunda (Deep Copy) e a Cópia Superficial (Shallow Copy) para comparar seus comportamentos.
+### 3. Configuração no `Program.cs` e Proteção com `[Authorize]`
 
 ```csharp
-using System;
-using System.Collections.Generic;
-
-namespace ClinicaPOO.Models
-{
-    public class PacoteExame
+// No Program.cs:
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
     {
-        public string NomePacote { get; set; }
-        public string OrientacoesJejum { get; set; }
-        public string NomePaciente { get; set; }
-        public List<Procedimento> Procedimentos { get; set; }
+        options.LoginPath = "/Account/Login";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+    });
 
-        public PacoteExame(string nomePacote, string orientacoesJejum)
-        {
-            NomePacote = nomePacote;
-            OrientacoesJejum = orientacoesJejum;
-            NomePaciente = "NÃO ATRIBUÍDO";
-            Procedimentos = new List<Procedimento>();
-        }
-
-        public void AdicionarProcedimento(Procedimento procedimento)
-        {
-            Procedimentos.Add(procedimento);
-        }
-
-        // 1. CÓPIA PROFUNDA (DEEP COPY) - O Jeito Correto!
-        // Instancia um novo pacote E uma nova lista com novos procedimentos clonados
-        public PacoteExame Clonar()
-        {
-            // Criamos um novo pacote na memória usando 'new'
-            PacoteExame pacoteClonado = new PacoteExame(this.NomePacote, this.OrientacoesJejum);
-            pacoteClonado.NomePaciente = this.NomePaciente;
-
-            // Percorremos a lista original e clonamos item por item para a nova lista
-            foreach (Procedimento item in this.Procedimentos)
-            {
-                Procedimento itemCopia = item.Clonar(); // Instancia um novo procedimento
-                pacoteClonado.Procedimentos.Add(itemCopia);
-            }
-
-            return pacoteClonado;
-        }
-
-        // 2. CÓPIA SUPERFICIAL (SHALLOW COPY) - Apenas para entender o Erro
-        // Copia apenas o pacote, mas aponta para a MESMA lista de procedimentos na memória
-        public PacoteExame ClonarSuperficial()
-        {
-            PacoteExame pacoteRaso = new PacoteExame(this.NomePacote, this.OrientacoesJejum);
-            pacoteRaso.NomePaciente = this.NomePaciente;
-            
-            // PERIGO: Não criamos uma nova lista, reutilizamos a mesma referência!
-            pacoteRaso.Procedimentos = this.Procedimentos; 
-
-            return pacoteRaso;
-        }
-
-        public void ExibirResumo()
-        {
-            Console.WriteLine($"\n[PACOTE]: {NomePacote} | Paciente: {NomePaciente}");
-            Console.WriteLine($"  Orientação: {OrientacoesJejum}");
-            Console.WriteLine("  Procedimentos inclusos:");
-            decimal total = 0;
-            foreach (var p in Procedimentos)
-            {
-                Console.WriteLine($"   - {p.Nome}: R$ {p.Valor:F2}");
-                total += p.Valor;
-            }
-            Console.WriteLine($"  Total: R$ {total:F2}");
-        }
-    }
-}
-
+// Ativação dos middlewares:
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 ```
 
-### 📂 Etapa 3: Gerenciador de Protótipos (Prototype Registry)
-### Subtarefa 3.1: Criar a classe GerenciadorPrototipos
-Crie o arquivo GerenciadorPrototipos.cs na pasta Services. Esta classe serve como um "catálogo" central onde os modelos ficam guardados para serem clonados a qualquer momento.
-
+Adicione o atributo na controller de reservas (`ReservaServicoController.cs`):
 
 ```csharp
-using System.Collections.Generic;
-using ClinicaPOO.Models;
-
-namespace ClinicaPOO.Services
+[Authorize]
+public class ReservaServicoController : Controller
 {
-    public class GerenciadorPrototipos
-    {
-        // Dicionário para guardar os protótipos modelo (Chave = Nome do Modelo, Valor = PacoteExame)
-        private Dictionary<string, PacoteExame> _prototipos = new Dictionary<string, PacoteExame>();
-
-        public void CadastrarPrototipo(string chave, PacoteExame prototipo)
-        {
-            _prototipos[chave] = prototipo;
-        }
-
-        public PacoteExame ObterClone(string chave)
-        {
-            if (_prototipos.ContainsKey(chave))
-            {
-                // Busca o modelo original e chama o nosso método Clonar() manual
-                PacoteExame modeloOriginal = _prototipos[chave];
-                return modeloOriginal.Clonar();
-            }
-
-            return null;
-        }
-    }
+    // Ações do controller protegidas...
 }
-
 ```
 
 ---
 
-### 📂 Etapa 4: Executando e Testando a Aplicação (Program.cs)
-### Subtarefa 4.1: Código do Program.cs
+## 📝 Questionário Interativo de Fixação (10 Questões)
 
-```csharp
-using System;
-using ClinicaPOO.Models;
-using ClinicaPOO.Services;
+Responda às questões abaixo para testar seus conhecimentos obtidos na aula prática de PetShop:
 
-Console.WriteLine("=== SISTEMA DA CLÍNICA VIDA & SAÚDE - PATTERN PROTOTYPE ===\n");
+1. **Qual das alternativas representa um Requisito Funcional no sistema do PetShop?**
+   * A) O banco de dados deve ser o SQL Server.
+   * **B) O sistema deve permitir agendar uma reserva vinculando 1 Cliente e 1 Veterinário.**
+   * C) A aplicação deve ser desenvolvida em C# com .NET 9.
+   * D) A página deve responder em menos de 2 segundos.
 
-GerenciadorPrototipos gerenciador = new GerenciadorPrototipos();
+2. **No comando de criação da tabela ReservaServico, qual instrução garante a integridade referencial com a tabela Cliente?**
+   * A) `PRIMARY KEY (ClienteId)`
+   * **B) `CONSTRAINT FK_ReservaServico_Cliente FOREIGN KEY (ClienteId) REFERENCES Cliente(Codigo)`**
+   * C) `UNIQUE (ClienteId)`
+   * D) `CHECK (ClienteId IS NOT NULL)`
 
-// 1. CONFIGURAÇÃO DOS MODELOS BASE (Protótipos)
-PacoteExame checkupCardio = new PacoteExame("Check-up Cardiológico", "Jejum de 8h e evitar cafeína");
-checkupCardio.AdicionarProcedimento(new Procedimento("Eletrocardiograma", 150.00m));
-checkupCardio.AdicionarProcedimento(new Procedimento("Ecocardiograma", 350.00m));
+3. **Qual tipo de dado do SQL Server foi utilizado para armazenar o campo 'Valor' da reserva?**
+   * A) `VARCHAR(10)`
+   * B) `INT`
+   * **C) `DECIMAL(10,2)`**
+   * D) `FLOAT`
 
-// Cadastra o modelo no gerenciador
-gerenciador.CadastrarPrototipo("CARDIO_PADRAO", checkupCardio);
+4. **Qual é o objetivo da ferramenta de Engenharia Reversa (Scaffold-DbContext) no Entity Framework Core?**
+   * A) Criar o banco de dados SQL Server a partir das classes C#.
+   * B) Gerar as tabelas do banco de dados automaticamente durante a execução.
+   * **C) Mapear um banco de dados existente gerando as classes de modelo (Models) e o DbContext.**
+   * D) Compilar o projeto ASP.NET Core sem erros.
 
-Console.WriteLine("--- Modelo Base Cadastrado ---");
-checkupCardio.ExibirResumo();
+5. **Para proteger um Controller e exigir que o usuário esteja autenticado no ASP.NET MVC, qual atributo é utilizado?**
+   * A) `[HttpGet]`
+   * **B) `[Authorize]`**
+   * C) `[Required]`
+   * D) `[ValidateAntiForgeryToken]`
 
-// 2. USO CORRETO: Clonando via Cópia Profunda (Deep Copy)
-Console.WriteLine("\n------------------------------------------------");
-Console.WriteLine("--> Atendimento 1: Clonando modelo base via Clonar() [Deep Copy]");
+6. **No arquivo Program.cs, qual a ordem correta na chamada dos middlewares de segurança?**
+   * A) `app.UseAuthorization();` depois `app.UseAuthentication();`
+   * **B) `app.UseAuthentication();` depois `app.UseAuthorization();`**
+   * C) A ordem não importa no pipeline do ASP.NET Core.
+   * D) Apenas `app.UseAuthorization()` é necessário.
 
-PacoteExame atendimento1 = gerenciador.ObterClone("CARDIO_PADRAO");
-atendimento1.NomePaciente = "Carlos Eduardo";
+7. **Para preencher automaticamente a chave primária sequencial da tabela Cliente no SQL Server, qual propriedade é aplicada à coluna Codigo?**
+   * A) `AUTO_INCREMENT`
+   * **B) `IDENTITY(1,1)`**
+   * C) `SEQUENCE`
+   * D) `DEFAULT(1)`
 
-// Adicionando procedimento extra exclusivo para o Paciente 1
-atendimento1.AdicionarProcedimento(new Procedimento("Holter 24h", 250.00m));
+8. **Qual recurso do ASP.NET MVC é utilizado para validar o formulário no lado do cliente e no servidor a partir das propriedades das Models?**
+   * **A) Data Annotations**
+   * B) Scaffolding
+   * C) DbContext
+   * D) Connection Strings
 
-atendimento1.ExibirResumo();
+9. **Qual função das Claims no mecanismo de CookieAuthentication?**
+   * A) Salvar os scripts SQL de migração.
+   * **B) Guardar declarações/informações sobre o usuário autenticado (como ID, Nome e CPF).**
+   * C) Conectar a aplicação com o servidor SQL Server.
+   * D) Gerar o layout HTML das views automaticamente.
 
-// 3. DEMONSTRAÇÃO DO ERRO DA CÓPIA SUPERFICIAL (Shallow Copy)
-Console.WriteLine("\n------------------------------------------------");
-Console.WriteLine("--> Atendimento 2: Exemplo de Clonagem Superficial (Incorreta)");
-
-PacoteExame modeloOriginal = gerenciador.ObterClone("CARDIO_PADRAO");
-PacoteExame atendimentoErro = modeloOriginal.ClonarSuperficial(); // Compartilha a mesma lista
-atendimentoErro.NomePaciente = "Ana Maria";
-
-// Adiciona procedimento no pacote da Ana Maria
-atendimentoErro.AdicionarProcedimento(new Procedimento("Glicemia em Jejum", 30.00m));
-
-Console.WriteLine("\n[Atendimento da Ana Maria com o novo exame]:");
-atendimentoErro.ExibirResumo();
-
-Console.WriteLine("\n[VERIFICAÇÃO]: O Modelo Base também foi alterado indevidamente:");
-modeloOriginal.ExibirResumo(); // A alteração afetou o modelo original porque a lista era a mesma!
-
-// 4. CONFIRMAÇÃO DO ISOLAMENTO DO ATENDIMENTO 1
-Console.WriteLine("\n------------------------------------------------");
-Console.WriteLine("[VERIFICAÇÃO]: Atendimento 1 (Deep Copy) permaneceu intacto:");
-atendimento1.ExibirResumo();
-
-```
-
-## 🚀 Desafios Extras: Evoluindo a Arquitetura do Código
-
-Agora que você entendeu o funcionamento manual da clonagem em memória (instanciando novos objetos com `new` e copiando listas manualmente), realize os desafios a seguir pesquisando como o C# e o ecossistema .NET oferecem recursos nativos para otimizar esse padrão.
-
----
-
-### 🟢 Desafio 1: Padronização com a Interface Nativa `ICloneable`
-Em projetos reais, é boa prática seguir os contratos fornecidos pela plataforma .NET em vez de criar métodos próprios com nomes arbitrários como `Clonar()`.
-
-* **O que pesquisar:** Como funciona a interface `System.ICloneable` da biblioteca base do C#?
-* **O que fazer:**
-  1. Faça as classes `Procedimento` e `PacoteExame` implementarem a interface `ICloneable`.
-  2. Altere a assinatura do método `Clonar()` para `public object Clone()`.
-  3. No `GerenciadorPrototipos` e no `Program.cs`, ajuste as chamadas do método para `Clone()` aplicando o *cast* (conversão explícita) de `object` para `PacoteExame`.
-
----
-
-### 🟡 Desafio 2: Otimizando com o Método Nativo `MemberwiseClone()`
-Criar instâncias manualmente atribuindo propriedade por propriedade pode ser trabalhoso em classes com dezenas de atributos. O .NET possui um método nativo herdado por todas as classes para facilitar esse processo.
-
-* **O que pesquisar:** O que faz o método `this.MemberwiseClone()` da classe `System.Object`? Qual é a diferença entre o comportamento dele para **tipos de valor** (int, decimal) e **tipos de referência** (listas, objetos)?
-* **O que fazer:**
-  1. Reescreva o método `Clone()` da classe `Procedimento` para utilizar o `MemberwiseClone()`.
-  2. Na classe `PacoteExame`, utilize o `MemberwiseClone()` para duplicar os dados básicos da classe e, em seguida, faça o ajuste manual da lista `Procedimentos` para garantir a **Cópia Profunda (Deep Copy)**.
-
----
-
-### 🔴 Desafio 3: Tipagem Forte com Generics (`IPrototipo<T>`)
-Ao usar a interface `ICloneable`, o C# retorna um tipo genérico `object`, o que obriga o desenvolvedor a fazer conversões manuais `(PacoteExame)` toda vez que clona um objeto.
-
-* **O que pesquisar:** O que são **Tipos Genéricos (Generics)** em C# e como a sintaxe `<T>` permite criar contratos fortemente tipados?
-* **O que fazer:**
-  1. Crie uma interface própria chamada `IPrototipo<T>` na pasta `Interfaces` com o método `T Clonar()`.
-  2. Implemente a interface nas classes: `public class PacoteExame : IPrototipo<PacoteExame>`.
-  3. Observe como o uso do `<T>` elimina a necessidade de fazer *cast* no `Program.cs` e no `GerenciadorPrototipos`.
+10. **Ao tentar excluir um Veterinário que já possui reservas cadastradas, o que deve ocorrer com base no requisito R5 (Integridade Relacional)?**
+    * A) O banco de dados exclui o veterinário e todas as suas reservas silenciosamente.
+    * **B) O banco lança um erro de restrição de chave estrangeira bloqueando a exclusão.**
+    * C) O sistema substitui o veterinário excluído por um valor nulo na reserva.
+    * D) A tabela de reservas é apagada por completo.
