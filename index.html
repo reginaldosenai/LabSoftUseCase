@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guia Prático: Design Pattern Prototype em C#</title>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: #334155;
+      --accent-blue: #38bdf8;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --code-bg: #090d16;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.6;
+      display: flex;
+    }
+
+    /* Navegação Lateral Fixo */
+    nav.sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: var(--bg-secondary);
+      padding: 20px 15px;
+      overflow-y: auto;
+      border-right: 1px solid #475569;
+    }
+
+    nav.sidebar h2 {
+      font-size: 1.1rem;
+      color: var(--accent-blue);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #475569;
+    }
+
+    nav.sidebar ul {
+      list-style: none;
+    }
+
+    nav.sidebar li {
+      margin-bottom: 10px;
+    }
+
+    nav.sidebar a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: block;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    nav.sidebar a:hover {
+      background-color: var(--bg-card);
+      color: var(--text-main);
+    }
+
+    /* Conteúdo Principal */
+    main.content {
+      margin-left: var(--sidebar-width);
+      padding: 40px;
+      max-width: 1000px;
+      width: calc(100% - var(--sidebar-width));
+    }
+
+    header {
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: var(--accent-blue);
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      color: var(--accent-blue);
+      margin-top: 30px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #475569;
+      padding-bottom: 5px;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      color: #e2e8f0;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    p, li {
+      color: #cbd5e1;
+      margin-bottom: 12px;
+    }
+
+    ul, ol {
+      margin-left: 20px;
+      margin-bottom: 20px;
+    }
+
+    /* Caixas de Código */
+    pre {
+      background-color: var(--code-bg);
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 15px 0;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.9rem;
+      color: #a5f3fc;
+    }
+
+    /* Diagrama SVG embutido */
+    .svg-container {
+      margin: 30px 0;
+      text-align: center;
+      background: var(--bg-secondary);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #475569;
+    }
+
+    .svg-container svg {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* Seção de Quiz */
+    .quiz-section {
+      background-color: var(--bg-secondary);
+      padding: 30px;
+      border-radius: 12px;
+      margin-top: 50px;
+      border: 1px solid #475569;
+    }
+
+    .question {
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #334155;
+    }
+
+    .question p {
+      font-weight: bold;
+      color: var(--text-main);
+      margin-bottom: 10px;
+    }
+
+    .options label {
+      display: block;
+      background: var(--bg-primary);
+      padding: 10px 15px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid #334155;
+      transition: background 0.2s;
+    }
+
+    .options label:hover {
+      background: var(--bg-card);
+    }
+
+    .options input {
+      margin-right: 10px;
+    }
+
+    button.btn-quiz {
+      background-color: var(--accent-blue);
+      color: #0f172a;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button.btn-quiz:hover {
+      background-color: #7dd3fc;
+    }
+
+    #quiz-result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 6px;
+      font-weight: bold;
+      display: none;
+    }
+
+    .result-success {
+      background-color: #064e3b;
+      color: #a7f3d0;
+      border: 1px solid #059669;
+    }
+
+    .result-warning {
+      background-color: #7f1d1d;
+      color: #fecaca;
+      border: 1px solid #dc2626;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+      nav.sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+      }
+      main.content {
+        margin-left: 0;
+        width: 100%;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Menu de Navegação Lateral -->
+  <nav class="sidebar">
+    <h2>Índice do Guia</h2>
+    <ul>
+      <li><a href="#contexto">📌 Contexto do Projeto</a></li>
+      <li><a href="#regra">💼 Regra de Negócio</a></li>
+      <li><a href="#objetivos">🎯 Objetivos de Aprendizagem</a></li>
+      <li><a href="#etapa1">📂 Etapa 1: Procedimento</a></li>
+      <li><a href="#etapa2">📂 Etapa 2: PacoteExame</a></li>
+      <li><a href="#etapa3">📂 Etapa 3: Gerenciador</a></li>
+      <li><a href="#etapa4">📂 Etapa 4: Program.cs</a></li>
+      <li><a href="#diagrama">📊 Mapeamento Visual</a></li>
+      <li><a href="#desafios">🚀 Desafios Extras</a></li>
+      <li><a href="#simulado">📝 Simulado Final</a></li>
+    </ul>
+  </nav>
+
+  <!-- Conteúdo Principal -->
+  <main class="content">
+    <header>
+      <h1>🚀 Guia Prático: Design Patterns C# - PATTERN PROTOTYPE</h1>
+      <p>Aplicações práticas na Gestão da Clínica Médica "Vida & Saúde"</p>
+    </header>
+
+    <section id="contexto">
+      <h2>📌 Contexto do Projeto</h2>
+      <p>Em sistemas de gestão hospitalar e clínica, é comum a criação recorrente de objetos complexos com configurações padronizadas. Criar esses objetos do zero instanciando todas as propriedades repetidamente pode gerar código redundante e gargalos de processamento.</p>
+      <p>Nesta atividade, você desenvolverá uma aplicação Console em <strong>C# (.NET 9)</strong> aplicando o padrão de projeto <strong>Prototype</strong> de forma 100% manual. Criaremos nossos próprios métodos para copiar os objetos, instanciando novas classes diretamente com o operador <code>new</code> para entender perfeitamente o que acontece na memória do computador.</p>
+    </section>
+
+    <section id="regra">
+      <h2>💼 Regra de Negócio: O Problema dos Check-ups e Protocolos Médicos</h2>
+      <p>A clínica "Vida & Saúde" oferece pacotes de exames padronizados (ex: <em>Check-up Cardiológico Geral</em>, <em>Check-up Admissional</em>, <em>Rotina Pediatria</em>). Cada pacote possui um conjunto fixo de procedimentos, orientações prévias e valores base.</p>
+      <ul>
+        <li><strong>Agilidade no Atendimento:</strong> Em vez de configurar individualmente cada solicitação de exame com suas dezenas de instruções, o atendente deve <strong>clonar um pacote modelo</strong> já cadastrado.</li>
+        <li><strong>Customização Individual:</strong> Após a clonagem, o atendente pode personalizar o nome do paciente e adicionar ou remover exames sem alterar o pacote modelo original.</li>
+        <li><strong>Cópia Superficial vs. Cópia Profunda (Shallow vs. Deep Copy):</strong> As solicitações contêm uma lista interna de procedimentos. Se duplicarmos apenas o pacote mas compartilharmos a mesma lista, ao alterar os exames de um paciente, alteraremos o modelo base. Precisamos aprender a fazer uma <strong>Cópia Profunda (Deep Copy)</strong> instanciando novos objetos e uma nova lista do zero.</li>
+      </ul>
+    </section>
+
+    <section id="objetivos">
+      <h2>🎯 Objetivos de Aprendizagem</h2>
+      <ol>
+        <li>Compreender o Pattern Prototype e quando aplicá-lo.</li>
+        <li>Entender que clonar manualmente é simplesmente instanciar um novo objeto (<code>new</code>) e copiar seus valores.</li>
+        <li>Diferenciar a cópia de um endereço de memória (Shallow Copy) da criação de uma lista isolada (Deep Copy).</li>
+        <li>Gerenciar protótipos usando <code>Dictionary&lt;string, PacoteExame&gt;</code>.</li>
+      </ol>
+    </section>
+
+    <section id="etapa1">
+      <h2>📂 Etapa 1: Criando a Classe Procedimento</h2>
+      <p>Crie o arquivo <code>Procedimento.cs</code> na pasta <code>Models</code>. Adicionaremos um método manual chamado <code>Clonar()</code> que retorna um novo <code>Procedimento</code>.</p>
+      <pre><code>namespace ClinicaPOO.Models
+{
+    public class Procedimento
+    {
+        public string Nome { get; set; }
+        public decimal Valor { get; set; }
+
+        public Procedimento(string nome, decimal valor)
+        {
+            Nome = nome;
+            Valor = valor;
+        }
+
+        // Clonagem Manual: Criamos uma NOVA instância usando 'new'
+        public Procedimento Clonar()
+        {
+            Procedimento novoProcedimento = new Procedimento(this.Nome, this.Valor);
+            return novoProcedimento;
+        }
+    }
+}</code></pre>
+    </section>
+
+    <section id="etapa2">
+      <h2>📂 Etapa 2: Implementando a Classe PacoteExame</h2>
+      <p>Crie o arquivo <code>PacoteExame.cs</code> na pasta <code>Models</code>. Aqui implementaremos manualmente a <strong>Cópia Profunda (Deep Copy)</strong> e a <strong>Cópia Superficial (Shallow Copy)</strong> para comparar seus comportamentos.</p>
+      <pre><code>using System;
+using System.Collections.Generic;
+
+namespace ClinicaPOO.Models
+{
+    public class PacoteExame
+    {
+        public string NomePacote { get; set; }
+        public string OrientacoesJejum { get; set; }
+        public string NomePaciente { get; set; }
+        public List&lt;Procedimento&gt; Procedimentos { get; set; }
+
+        public PacoteExame(string nomePacote, string orientacoesJejum)
+        {
+            NomePacote = nomePacote;
+            OrientacoesJejum = orientacoesJejum;
+            NomePaciente = "NÃO ATRIBUÍDO";
+            Procedimentos = new List&lt;Procedimento&gt;();
+        }
+
+        public void AdicionarProcedimento(Procedimento procedimento)
+        {
+            Procedimentos.Add(procedimento);
+        }
+
+        // 1. CÓPIA PROFUNDA (DEEP COPY) - O Jeito Correto!
+        public PacoteExame Clonar()
+        {
+            PacoteExame pacoteClonado = new PacoteExame(this.NomePacote, this.OrientacoesJejum);
+            pacoteClonado.NomePaciente = this.NomePaciente;
+
+            // Percorremos a lista original e clonamos item por item para a nova lista
+            foreach (Procedimento item in this.Procedimentos)
+            {
+                Procedimento itemCopia = item.Clonar(); // Instancia um novo procedimento
+                pacoteClonado.Procedimentos.Add(itemCopia);
+            }
+
+            return pacoteClonado;
+        }
+
+        // 2. CÓPIA SUPERFICIAL (SHALLOW COPY) - Exemplo de Erro
+        public PacoteExame ClonarSuperficial()
+        {
+            PacoteExame pacoteRaso = new PacoteExame(this.NomePacote, this.OrientacoesJejum);
+            pacoteRaso.NomePaciente = this.NomePaciente;
+            
+            // PERIGO: Reutiliza a mesma referência da lista!
+            pacoteRaso.Procedimentos = this.Procedimentos; 
+
+            return pacoteRaso;
+        }
+
+        public void ExibirResumo()
+        {
+            Console.WriteLine($"\n[PACOTE]: {NomePacote} | Paciente: {NomePaciente}");
+            Console.WriteLine($"  Orientação: {OrientacoesJejum}");
+            Console.WriteLine("  Procedimentos inclusos:");
+            decimal total = 0;
+            foreach (var p in Procedimentos)
+            {
+                Console.WriteLine($"   - {p.Nome}: R$ {p.Valor:F2}");
+                total += p.Valor;
+            }
+            Console.WriteLine($"  Total: R$ {total:F2}");
+        }
+    }
+}</code></pre>
+    </section>
+
+    <section id="etapa3">
+      <h2>📂 Etapa 3: Gerenciador de Protótipos (Prototype Registry)</h2>
+      <p>Crie o arquivo <code>GerenciadorPrototipos.cs</code> na pasta <code>Services</code>. Esta classe serve como um catálogo central onde os modelos ficam guardados.</p>
+      <pre><code>using System.Collections.Generic;
+using ClinicaPOO.Models;
+
+namespace ClinicaPOO.Services
+{
+    public class GerenciadorPrototipos
+    {
+        private Dictionary&lt;string, PacoteExame&gt; _prototipos = new Dictionary&lt;string, PacoteExame&gt;();
+
+        public void CadastrarPrototipo(string chave, PacoteExame prototipo)
+        {
+            _prototipos[chave] = prototipo;
+        }
+
+        public PacoteExame ObterClone(string chave)
+        {
+            if (_prototipos.ContainsKey(chave))
+            {
+                PacoteExame modeloOriginal = _prototipos[chave];
+                return modeloOriginal.Clonar();
+            }
+
+            return null;
+        }
+    }
+}</code></pre>
+    </section>
+
+    <section id="etapa4">
+      <h2>📂 Etapa 4: Executando e Testando a Aplicação (Program.cs)</h2>
+      <p>Monte o fluxo principal do programa simulando os atendimentos e verificando o isolamento dos dados em memória.</p>
+      <pre><code>using System;
+using ClinicaPOO.Models;
+using ClinicaPOO.Services;
+
+Console.WriteLine("=== SISTEMA DA CLÍNICA VIDA & SAÚDE - PATTERN PROTOTYPE ===\n");
+
+GerenciadorPrototipos gerenciador = new GerenciadorPrototipos();
+
+// 1. CONFIGURAÇÃO DOS MODELOS BASE (Protótipos)
+PacoteExame checkupCardio = new PacoteExame("Check-up Cardiológico", "Jejum de 8h e evitar cafeína");
+checkupCardio.AdicionarProcedimento(new Procedimento("Eletrocardiograma", 150.00m));
+checkupCardio.AdicionarProcedimento(new Procedimento("Ecocardiograma", 350.00m));
+
+gerenciador.CadastrarPrototipo("CARDIO_PADRAO", checkupCardio);
+
+// 2. USO CORRETO: Clonando via Cópia Profunda (Deep Copy)
+PacoteExame atendimento1 = gerenciador.ObterClone("CARDIO_PADRAO");
+atendimento1.NomePaciente = "Carlos Eduardo";
+atendimento1.AdicionarProcedimento(new Procedimento("Holter 24h", 250.00m));
+
+// 3. DEMONSTRAÇÃO DO ERRO DA CÓPIA SUPERFICIAL
+PacoteExame modeloOriginal = gerenciador.ObterClone("CARDIO_PADRAO");
+PacoteExame atendimentoErro = modeloOriginal.ClonarSuperficial();
+atendimentoErro.NomePaciente = "Ana Maria";
+atendimentoErro.AdicionarProcedimento(new Procedimento("Glicemia em Jejum", 30.00m));
+
+// Exibindo resultados...
+atendimento1.ExibirResumo();
+modeloOriginal.ExibirResumo(); // A alteração afetou o modelo original na cópia rasa!</code></pre>
+    </section>
+
+    <section id="diagrama">
+      <h2>📊 Mapeamento Visual em Memória</h2>
+      <div class="svg-container">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="100%" height="100%">
+          <defs>
+            <linearGradient id="protoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#1e293b" />
+              <stop offset="100%" stop-color="#334155" />
+            </linearGradient>
+            <linearGradient id="deepGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#064e3b" />
+              <stop offset="100%" stop-color="#022c22" />
+            </linearGradient>
+            <linearGradient id="shallowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#7f1d1d" />
+              <stop offset="100%" stop-color="#450a0a" />
+            </linearGradient>
+            <marker id="arrowGreen" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#10b981" />
+            </marker>
+            <marker id="arrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444" />
+            </marker>
+          </defs>
+
+          <text x="480" y="45" text-anchor="middle" fill="#f8fafc" font-size="20" font-weight="700">Mapeamento em Memória: Método Manual Clonar()</text>
+
+          <!-- Protótipo -->
+          <g transform="translate(50, 90)">
+            <rect x="0" y="0" width="260" height="420" rx="12" fill="url(#protoGrad)" stroke="#3b82f6" stroke-width="2" />
+            <path d="M 0 12 Q 0 0 12 0 L 248 0 Q 260 0 260 12 L 260 45 L 0 45 Z" fill="#2563eb" />
+            <text x="130" y="28" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700">PROTÓTIPO ORIGINAL</text>
+            <text x="20" y="75" fill="#94a3b8" font-size="11">Instância PacoteExame</text>
+            <text x="20" y="95" fill="#f1f5f9" font-size="13" font-weight="bold">"Check-up Cardiológico"</text>
+            <rect x="15" y="145" width="230" height="250" rx="8" fill="#0f172a" stroke="#64748b" stroke-dasharray="3 3" />
+            <text x="25" y="170" fill="#38bdf8" font-size="11" font-weight="700">📍 List&lt;Procedimento&gt; (Lista A)</text>
+            <rect x="25" y="190" width="210" height="40" rx="4" fill="#1e293b" />
+            <text x="35" y="215" fill="#e2e8f0" font-size="11">Eletrocardiograma | R$ 150</text>
+            <rect x="25" y="240" width="210" height="40" rx="4" fill="#1e293b" />
+            <text x="35" y="265" fill="#e2e8f0" font-size="11">Ecocardiograma | R$ 350</text>
+            <text x="130" y="380" text-anchor="middle" fill="#38bdf8" font-size="11" font-weight="bold">Heap: Endereço 0x10A</text>
+          </g>
+
+          <!-- Deep Copy -->
+          <g transform="translate(430, 90)">
+            <rect x="0" y="0" width="480" height="200" rx="12" fill="url(#deepGrad)" stroke="#10b981" stroke-width="2" />
+            <rect x="300" y="12" width="165" height="24" rx="12" fill="#10b981" />
+            <text x="382" y="28" text-anchor="middle" fill="#022c22" font-size="11" font-weight="800">DEEP COPY (CORRETO)</text>
+            <text x="20" y="35" fill="#a7f3d0" font-size="14" font-weight="bold">Atendimento 1: "Carlos Eduardo"</text>
+            <rect x="20" y="60" width="440" height="120" rx="8" fill="#022c22" stroke="#059669" />
+            <text x="35" y="85" fill="#34d399" font-size="11" font-weight="700">📍 NOVA Lista em Memória (Lista B)</text>
+            <text x="35" y="110" fill="#e2e8f0" font-size="11">• Eletrocardiograma (Novo objeto via Clonar())</text>
+            <text x="35" y="130" fill="#e2e8f0" font-size="11">• Ecocardiograma (Novo objeto via Clonar())</text>
+            <text x="35" y="155" fill="#fde047" font-size="11" font-weight="bold">➕ Holter 24h (Adicionado APENAS na Lista B)</text>
+            <text x="440" y="170" text-anchor="end" fill="#34d399" font-size="10">Heap: Endereço 0x99B</text>
+          </g>
+
+          <!-- Shallow Copy -->
+          <g transform="translate(430, 310)">
+            <rect x="0" y="0" width="480" height="200" rx="12" fill="url(#shallowGrad)" stroke="#ef4444" stroke-width="2" />
+            <rect x="290" y="12" width="175" height="24" rx="12" fill="#ef4444" />
+            <text x="377" y="28" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="800">SHALLOW COPY (ERRO)</text>
+            <text x="20" y="35" fill="#fecaca" font-size="14" font-weight="bold">Atendimento 2: "Ana Maria"</text>
+            <rect x="20" y="60" width="440" height="120" rx="8" fill="#450a0a" stroke="#dc2626" />
+            <text x="35" y="85" fill="#fca5a5" font-size="11" font-weight="700">⚠️ APONTA PARA A MESMA LISTA DO PROTÓTIPO (Lista A)</text>
+            <text x="35" y="110" fill="#94a3b8" font-size="11">• Eletrocardiograma</text>
+            <text x="35" y="130" fill="#94a3b8" font-size="11">• Ecocardiograma</text>
+            <text x="35" y="155" fill="#ef4444" font-size="11" font-weight="bold">⚠️ Glicemia em Jejum (Injetado diretamente na Lista A!)</text>
+            <text x="440" y="170" text-anchor="end" fill="#fca5a5" font-size="10">Heap: Reutiliza 0x10A</text>
+          </g>
+
+          <!-- Setas -->
+          <path d="M 310 180 Q 360 160 420 160" fill="none" stroke="#10b981" stroke-width="3" marker-end="url(#arrowGreen)" />
+          <path d="M 310 380 Q 360 410 420 410" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="5 5" marker-end="url(#arrowRed)" />
+        </svg>
+      </div>
+    </section>
+
+    <section id="desafios">
+      <h2>🚀 Desafios Extras: Pesquise e Evolua seu Código</h2>
+      <p>Pesquise sobre as seguintes evoluções no ecossistema C#:</p>
+      <ul>
+        <li><strong>🟢 Desafio 1 (Padronização com <code>ICloneable</code>):</strong> Altere suas classes para implementarem a interface nativa <code>System.ICloneable</code> e o método <code>object Clone()</code>.</li>
+        <li><strong>🟡 Desafio 2 (Atalho com <code>MemberwiseClone()</code>):</strong> Pesquise o que faz o método <code>MemberwiseClone()</code> do .NET e como ele facilita a cópia superficial de propriedades.</li>
+        <li><strong>🔴 Desafio 3 (Tipagem Forte com Generics):</strong> Crie uma interface <code>IPrototipo&lt;T&gt;</code> para evitar o uso de <em>casts</em> manuais no C#.</li>
+      </ul>
+    </section>
+
+    <!-- Seção do Quiz Interativo -->
+    <section id="simulado" class="quiz-section">
+      <h2>📝 Simulado de Fixação (5 Questões)</h2>
+      <form id="quiz-form">
+        
+        <div class="question">
+          <p>1. Qual é a principal motivação para utilizar o Design Pattern Prototype?</p>
+          <div class="options">
+            <label><input type="radio" name="q1" value="A"> A) Persistir objetos diretamente em um banco de dados relacional.</label>
+            <label><input type="radio" name="q1" value="B"> B) Criar novos objetos copiando instâncias pré-configuradas em memória, evitando reconstruções custosas do zero.</label>
+            <label><input type="radio" name="q1" value="C"> C) Garantir que uma classe tenha apenas uma única instância em toda a aplicação.</label>
+            <label><input type="radio" name="q1" value="D"> D) Converter a interface de uma classe em outra interface esperada pelos clientes.</label>
+          </div>
+        </div>
+
+        <div class="question">
+          <p>2. No contexto de orientação a objetos, qual é a diferença entre Shallow Copy (Cópia Superficial) e Deep Copy (Cópia Profunda)?</p>
+          <div class="options">
+            <label><input type="radio" name="q2" value="A"> A) Shallow Copy duplica apenas os métodos, enquanto Deep Copy duplica apenas as propriedades.</label>
+            <label><input type="radio" name="q2" value="B"> B) Shallow Copy duplica objetos internos; Deep Copy apenas copia o tipo por valor.</label>
+            <label><input type="radio" name="q2" value="C"> C) Shallow Copy copia valores primitivos mas compartilha referências de objetos aninhados/listas; Deep Copy cria novas instâncias de tudo, isolando o clone.</label>
+            <label><input type="radio" name="q2" value="D"> D) Não há diferença prática em C#.</label>
+          </div>
+        </div>
+
+        <div class="question">
+          <p>3. Na nossa implementação manual, o que acontece ao executar o comando `new List<Procedimento>()` dentro do método `Clonar()` da classe `PacoteExame`?</p>
+          <div class="options">
+            <label><input type="radio" name="q3" value="A"> A) Apaga os dados do objeto original.</label>
+            <label><input type="radio" name="q3" value="B"> B) Garante a criação de um novo endereço de memória para a lista do objeto clonado, impedindo que alterações no clone afetem o modelo original.</label>
+            <label><input type="radio" name="q3" value="C"> C) Causa um erro de compilação por tentar instanciar uma interface.</label>
+            <label><input type="radio" name="q3" value="D"> D) Conecta a lista diretamente com o banco de dados.</label>
+          </div>
+        </div>
+
+        <div class="question">
+          <p>4. Para que serve a classe `GerenciadorPrototipos` (Prototype Registry) na estrutura do projeto?</p>
+          <div class="options">
+            <label><input type="radio" name="q4" value="A"> A) Serve como um repositório/catálogo central para armazenar e fornecer os modelos base pré-configurados prontos para clonagem.</label>
+            <label><input type="radio" name="q4" value="B"> B) Para validar o CPF e o nome dos pacientes cadastrados.</label>
+            <label><input type="radio" name="q4" value="C"> C) Para destruir objetos não utilizados da memória através do Garbage Collector.</label>
+            <label><input type="radio" name="q4" value="D"> D) Para criptografar os exames médicos dos pacientes.</label>
+          </div>
+        </div>
+
+        <div class="question">
+          <p>5. Se na classe `PacoteExame` fizéssemos `pacoteClonado.Procedimentos = this.Procedimentos;`, qual seria o problema gerado?</p>
+          <div class="options">
+            <label><input type="radio" name="q5" value="A"> A) O código não compilaria porque os tipos são incompatíveis.</label>
+            <label><input type="radio" name="q5" value="B"> B) Seria gerada uma Cópia Superficial, fazendo com que qualquer novo exame adicionado ao paciente alterasse também o modelo base cadastrado na clínica.</label>
+            <label><input type="radio" name="q5" value="C"> C) Os exames do modelo base seriam excluídos automaticamente.</label>
+            <label><input type="radio" name="q5" value="D"> D) A lista de procedimentos ficaria nula (null).</label>
+          </div>
+        </div>
+
+        <button type="button" class="btn-quiz" onclick="calcularResultado()">Finalizar Simulado</button>
+      </form>
+
+      <div id="quiz-result"></div>
+    </section>
+  </main>
+
+  <script>
+    function calcularResultado() {
+      // Gabarito correto: 1:B, 2:C, 3:B, 4:A, 5:B
+      const respostasCorretas = {
+        q1: 'B',
+        q2: 'C',
+        q3: 'B',
+        q4: 'A',
+        q5: 'B'
+      };
+
+      let acertos = 0;
+      let totalQuestoes = 5;
+      let form = document.getElementById('quiz-form');
+
+      for (let i = 1; i <= totalQuestoes; i++) {
+        let questao = 'q' + i;
+        let selecionado = form.elements[questao].value;
+
+        if (selecionado === respostasCorretas[questao]) {
+          acertos++;
+        }
+      }
+
+      let divResultado = document.getElementById('quiz-result');
+      divResultado.style.display = 'block';
+
+      if (acertos >= 4) {
+        divResultado.className = 'result-success';
+        divResultado.innerHTML = `🎉 <strong>Excelente desempenho!</strong> Você acertou ${acertos} de ${totalQuestoes} questões. Você dominou o conceito do Pattern Prototype e gerenciamento de memória em C#!`;
+      } else {
+        divResultado.className = 'result-warning';
+        divResultado.innerHTML = `⚠️ <strong>Atenção:</strong> Você acertou ${acertos} de ${totalQuestoes} questões. Revise os conceitos de Deep Copy vs Shallow Copy no texto acima e tente novamente.`;
+      }
+    }
+  </script>
+</body>
+</html>
