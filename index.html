@@ -1,648 +1,779 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Guia Prático: Design Pattern Prototype em C#</title>
-  <style>
-    :root {
-      --bg-primary: #0f172a;
-      --bg-secondary: #1e293b;
-      --bg-card: #334155;
-      --accent-blue: #38bdf8;
-      --accent-green: #10b981;
-      --accent-red: #ef4444;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --code-bg: #090d16;
-      --sidebar-width: 280px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia Prático: Sistema PetShop - Agendamento de Serviços</title>
+    <style>
+        :root {
+            --primary: #2b6cb0;
+            --primary-hover: #2c5282;
+            --secondary: #319795;
+            --bg-body: #f7fafc;
+            --bg-card: #ffffff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --code-bg: #1a202c;
+            --code-color: #f7fafc;
+            --success: #38a169;
+            --danger: #e53e3e;
+            --nav-bg: #1a202c;
+            --nav-text: #edf2f7;
+        }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background-color: var(--bg-primary);
-      color: var(--text-main);
-      line-height: 1.6;
-      display: flex;
-    }
+        html {
+            scroll-behavior: smooth;
+        }
 
-    /* Navegação Lateral Fixo */
-    nav.sidebar {
-      width: var(--sidebar-width);
-      height: 100vh;
-      position: fixed;
-      top: 0;
-      left: 0;
-      background-color: var(--bg-secondary);
-      padding: 20px 15px;
-      overflow-y: auto;
-      border-right: 1px solid #475569;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-top: 70px; /* Espaço para o menu fixo */
+        }
 
-    nav.sidebar h2 {
-      font-size: 1.1rem;
-      color: var(--accent-blue);
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #475569;
-    }
+        /* Menu de Navegação Fixo */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--nav-bg);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        }
 
-    nav.sidebar ul {
-      list-style: none;
-    }
+        .navbar-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            height: 60px;
+        }
 
-    nav.sidebar li {
-      margin-bottom: 10px;
-    }
+        .navbar-brand {
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-    nav.sidebar a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.9rem;
-      display: block;
-      padding: 8px 12px;
-      border-radius: 6px;
-      transition: all 0.2s ease;
-    }
+        .navbar-menu {
+            display: flex;
+            list-style: none;
+            gap: 15px;
+            overflow-x: auto;
+            padding: 5px 0;
+        }
 
-    nav.sidebar a:hover {
-      background-color: var(--bg-card);
-      color: var(--text-main);
-    }
+        .navbar-menu li {
+            margin: 0;
+            white-space: nowrap;
+        }
 
-    /* Conteúdo Principal */
-    main.content {
-      margin-left: var(--sidebar-width);
-      padding: 40px;
-      max-width: 1000px;
-      width: calc(100% - var(--sidebar-width));
-    }
+        .navbar-menu a {
+            color: var(--nav-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 4px;
+            transition: background 0.2s, color 0.2s;
+        }
 
-    header {
-      margin-bottom: 40px;
-    }
+        .navbar-menu a:hover {
+            background-color: var(--primary);
+            color: #ffffff;
+        }
 
-    h1 {
-      font-size: 2rem;
-      color: var(--accent-blue);
-      margin-bottom: 10px;
-    }
+        .container {
+            max-width: 1000px;
+            margin: 20px auto 40px auto;
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
 
-    h2 {
-      font-size: 1.4rem;
-      color: var(--accent-blue);
-      margin-top: 30px;
-      margin-bottom: 15px;
-      border-bottom: 1px solid #475569;
-      padding-bottom: 5px;
-    }
+        h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 20px;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 10px;
+        }
 
-    h3 {
-      font-size: 1.1rem;
-      color: #e2e8f0;
-      margin-top: 20px;
-      margin-bottom: 10px;
-    }
+        h2 {
+            color: var(--primary-hover);
+            font-size: 1.4rem;
+            margin-top: 35px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--secondary);
+            padding-left: 10px;
+            scroll-margin-top: 80px; /* Offset para o cabeçalho não cobrir o título ao rolar */
+        }
 
-    p, li {
-      color: #cbd5e1;
-      margin-bottom: 12px;
-    }
+        h3 {
+            font-size: 1.1rem;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
 
-    ul, ol {
-      margin-left: 20px;
-      margin-bottom: 20px;
-    }
+        p, ul, ol {
+            margin-bottom: 15px;
+        }
 
-    /* Caixas de Código */
-    pre {
-      background-color: var(--code-bg);
-      border: 1px solid #334155;
-      border-radius: 8px;
-      padding: 16px;
-      overflow-x: auto;
-      margin: 15px 0;
-      font-family: 'Consolas', 'Courier New', monospace;
-      font-size: 0.9rem;
-      color: #a5f3fc;
-    }
+        ul, ol {
+            padding-left: 20px;
+        }
 
-    /* Diagrama SVG embutido */
-    .svg-container {
-      margin: 30px 0;
-      text-align: center;
-      background: var(--bg-secondary);
-      padding: 20px;
-      border-radius: 12px;
-      border: 1px solid #475569;
-    }
+        li {
+            margin-bottom: 5px;
+        }
 
-    .svg-container svg {
-      max-width: 100%;
-      height: auto;
-    }
+        hr {
+            border: 0;
+            height: 1px;
+            background: var(--border-color);
+            margin: 30px 0;
+        }
 
-    /* Seção de Quiz */
-    .quiz-section {
-      background-color: var(--bg-secondary);
-      padding: 30px;
-      border-radius: 12px;
-      margin-top: 50px;
-      border: 1px solid #475569;
-    }
+        .callout {
+            background-color: #ebf8ff;
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
 
-    .question {
-      margin-bottom: 25px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid #334155;
-    }
+        .callout-warning {
+            background-color: #fffaf0;
+            border-left-color: #dd6b20;
+        }
 
-    .question p {
-      font-weight: bold;
-      color: var(--text-main);
-      margin-bottom: 10px;
-    }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
 
-    .options label {
-      display: block;
-      background: var(--bg-primary);
-      padding: 10px 15px;
-      margin-bottom: 8px;
-      border-radius: 6px;
-      cursor: pointer;
-      border: 1px solid #334155;
-      transition: background 0.2s;
-    }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+        }
 
-    .options label:hover {
-      background: var(--bg-card);
-    }
+        th {
+            background-color: #edf2f7;
+            font-weight: 600;
+        }
 
-    .options input {
-      margin-right: 10px;
-    }
+        tr:nth-child(even) {
+            background-color: #f7fafc;
+        }
 
-    button.btn-quiz {
-      background-color: var(--accent-blue);
-      color: #0f172a;
-      border: none;
-      padding: 12px 24px;
-      font-size: 1rem;
-      font-weight: bold;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-color);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9rem;
+            margin: 15px 0;
+        }
 
-    button.btn-quiz:hover {
-      background-color: #7dd3fc;
-    }
+        code {
+            background-color: #edf2f7;
+            color: #c53030;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
 
-    #quiz-result {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 6px;
-      font-weight: bold;
-      display: none;
-    }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
 
-    .result-success {
-      background-color: #064e3b;
-      color: #a7f3d0;
-      border: 1px solid #059669;
-    }
+        /* Questionário */
+        .quiz-container {
+            background-color: #f8fafc;
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 30px;
+            scroll-margin-top: 80px;
+        }
 
-    .result-warning {
-      background-color: #7f1d1d;
-      color: #fecaca;
-      border: 1px solid #dc2626;
-    }
+        .quiz-question {
+            margin-bottom: 25px;
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
 
-    /* Responsividade */
-    @media (max-width: 768px) {
-      body {
-        flex-direction: column;
-      }
-      nav.sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-      }
-      main.content {
-        margin-left: 0;
-        width: 100%;
-        padding: 20px;
-      }
-    }
-  </style>
+        .quiz-question p {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .quiz-option {
+            display: block;
+            margin-bottom: 8px;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        .quiz-option input {
+            margin-right: 8px;
+        }
+
+        .btn-submit {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: block;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+        }
+
+        #quiz-result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+
+        .result-success {
+            background-color: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .result-warning {
+            background-color: #feebc8;
+            color: #744210;
+            border: 1px solid #fbd38d;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- Menu de Navegação Lateral -->
-  <nav class="sidebar">
-    <h2>Índice do Guia</h2>
+<!-- Menu de Navegação Fixo -->
+<nav class="navbar">
+    <div class="navbar-container">
+        <a href="#contexto" class="navbar-brand">🐾 PetShop Dev</a>
+        <ul class="navbar-menu">
+            <li><a href="#contexto">Contexto</a></li>
+            <li><a href="#requisitos">Requisitos</a></li>
+            <li><a href="#der">DER</a></li>
+            <li><a href="#script-sql">Script SQL</a></li>
+            <li><a href="#csv">CSV</a></li>
+            <li><a href="#aspnet">ASP.NET Core</a></li>
+            <li><a href="#autenticacao">Autenticação</a></li>
+            <li><a href="#questionario">Questionário</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <h1>🚀 Guia Prático: SISTEMA PETSHOP - AGENDAMENTO DE SERVIÇOS</h1>
+
+    <h2 id="contexto">📌 Contexto do Projeto: Sistema de Gestão do PetShop "Patas & Carinho"</h2>
+    <p>O PetShop "Patas & Carinho" precisa informatizar o atendimento de serviços prestados aos pets para melhorar a organização da agenda diária. Atualmente, os tutores/clientes ligam ou vão presencialmente ao estabelecimento para agendar atendimentos de especialidades veterinárias e procedimentos gerais.</p>
+    <p>No sistema, um <strong>Cliente</strong> cadastra seus dados pessoais (Nome, CPF, Telefone e Data de Nascimento). O <strong>Veterinario</strong> possui seu cadastro contendo Nome, CRMV e Especialidade. A <strong>ReservaServico</strong> representa o agendamento em si, onde é registrado o Cliente, o Veterinario responsável pelo atendimento, a Data/Hora agendada, o Valor do serviço informado no momento do agendamento e o Status do atendimento (Ex: Agendada, Realizada, Cancelada).</p>
+
+    <div class="callout">
+        <strong>Regra do Sistema:</strong> O cliente só consegue realizar uma reserva de serviço se estiver logado. Ao abrir o sistema, a primeira tela apresentada deve ser a de login, contendo também a opção para cadastro de novos clientes.
+    </div>
+
+    <hr>
+
+    <h2>🛠️ Pré-requisitos</h2>
     <ul>
-      <li><a href="#contexto">📌 Contexto do Projeto</a></li>
-      <li><a href="#regra">💼 Regra de Negócio</a></li>
-      <li><a href="#objetivos">🎯 Objetivos de Aprendizagem</a></li>
-      <li><a href="#etapa1">📂 Etapa 1: Procedimento</a></li>
-      <li><a href="#etapa2">📂 Etapa 2: PacoteExame</a></li>
-      <li><a href="#etapa3">📂 Etapa 3: Gerenciador</a></li>
-      <li><a href="#etapa4">📂 Etapa 4: Program.cs</a></li>
-      <li><a href="#diagrama">📊 Mapeamento Visual</a></li>
-      <li><a href="#desafios">🚀 Desafios Extras</a></li>
-      <li><a href="#simulado">📝 Simulado Final</a></li>
+        <li>Visual Studio 2022 (com suporte ao .NET 9 instalado)</li>
+        <li>Microsoft SQL Server e SQL Server Management Studio (SSMS)</li>
     </ul>
-  </nav>
 
-  <!-- Conteúdo Principal -->
-  <main class="content">
-    <header>
-      <h1>🚀 Guia Prático: Design Patterns C# - PATTERN PROTOTYPE</h1>
-      <p>Aplicações práticas na Gestão da Clínica Médica "Vida & Saúde"</p>
-    </header>
+    <hr>
 
-    <section id="contexto">
-      <h2>📌 Contexto do Projeto</h2>
-      <p>Em sistemas de gestão hospitalar e clínica, é comum a criação recorrente de objetos complexos com configurações padronizadas. Criar esses objetos do zero instanciando todas as propriedades repetidamente pode gerar código redundante e gargalos de processamento.</p>
-      <p>Nesta atividade, você desenvolverá uma aplicação Console em <strong>C# (.NET 9)</strong> aplicando o padrão de projeto <strong>Prototype</strong> de forma 100% manual. Criaremos nossos próprios métodos para copiar os objetos, instanciando novas classes diretamente com o operador <code>new</code> para entender perfeitamente o que acontece na memória do computador.</p>
-    </section>
+    <h2 id="requisitos">🗄️ Etapa 1: Levantamento de Requisitos Funcionais</h2>
+    <p>Os requisitos funcionais referem-se às regras de negócio da aplicação. Diferenciam-se dos requisitos não funcionais, que tratam das tecnologias empregadas (como linguagem de programação ou banco de dados).</p>
 
-    <section id="regra">
-      <h2>💼 Regra de Negócio: O Problema dos Check-ups e Protocolos Médicos</h2>
-      <p>A clínica "Vida & Saúde" oferece pacotes de exames padronizados (ex: <em>Check-up Cardiológico Geral</em>, <em>Check-up Admissional</em>, <em>Rotina Pediatria</em>). Cada pacote possui um conjunto fixo de procedimentos, orientações prévias e valores base.</p>
-      <ul>
-        <li><strong>Agilidade no Atendimento:</strong> Em vez de configurar individualmente cada solicitação de exame com suas dezenas de instruções, o atendente deve <strong>clonar um pacote modelo</strong> já cadastrado.</li>
-        <li><strong>Customização Individual:</strong> Após a clonagem, o atendente pode personalizar o nome do paciente e adicionar ou remover exames sem alterar o pacote modelo original.</li>
-        <li><strong>Cópia Superficial vs. Cópia Profunda (Shallow vs. Deep Copy):</strong> As solicitações contêm uma lista interna de procedimentos. Se duplicarmos apenas o pacote mas compartilharmos a mesma lista, ao alterar os exames de um paciente, alteraremos o modelo base. Precisamos aprender a fazer uma <strong>Cópia Profunda (Deep Copy)</strong> instanciando novos objetos e uma nova lista do zero.</li>
-      </ul>
-    </section>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Requisito</th>
+                <th>Descrição</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>R1</strong></td>
+                <td>Cadastro de Clientes</td>
+                <td>O sistema deve permitir cadastrar, visualizar, atualizar e excluir (CRUD) os dados dos clientes.</td>
+            </tr>
+            <tr>
+                <td><strong>R2</strong></td>
+                <td>Cadastro de Veterinários</td>
+                <td>O sistema deve permitir cadastrar, visualizar, atualizar e excluir (CRUD) os dados dos veterinários (incluindo CRMV e Especialidade).</td>
+            </tr>
+            <tr>
+                <td><strong>R3</strong></td>
+                <td>Reserva de Serviço</td>
+                <td>O sistema deve permitir agendar reservas vinculando obrigatoriamente 1 Cliente e 1 Veterinario a uma data/hora e informando o Valor do serviço.</td>
+            </tr>
+            <tr>
+                <td><strong>R4</strong></td>
+                <td>Controle de Status</td>
+                <td>Toda reserva deve iniciar com o status "Agendada", permitindo alteração para "Realizada" ou "Cancelada".</td>
+            </tr>
+            <tr>
+                <td><strong>R5</strong></td>
+                <td>Integridade Relacional</td>
+                <td>Não deve ser possível excluir um cliente ou veterinário que já possua reservas vinculadas em seu histórico.</td>
+            </tr>
+        </tbody>
+    </table>
 
-    <section id="objetivos">
-      <h2>🎯 Objetivos de Aprendizagem</h2>
-      <ol>
-        <li>Compreender o Pattern Prototype e quando aplicá-lo.</li>
-        <li>Entender que clonar manualmente é simplesmente instanciar um novo objeto (<code>new</code>) e copiar seus valores.</li>
-        <li>Diferenciar a cópia de um endereço de memória (Shallow Copy) da criação de uma lista isolada (Deep Copy).</li>
-        <li>Gerenciar protótipos usando <code>Dictionary&lt;string, PacoteExame&gt;</code>.</li>
-      </ol>
-    </section>
+    <hr>
 
-    <section id="etapa1">
-      <h2>📂 Etapa 1: Criando a Classe Procedimento</h2>
-      <p>Crie o arquivo <code>Procedimento.cs</code> na pasta <code>Models</code>. Adicionaremos um método manual chamado <code>Clonar()</code> que retorna um novo <code>Procedimento</code>.</p>
-      <pre><code>namespace ClinicaPOO.Models
-{
-    public class Procedimento
-    {
-        public string Nome { get; set; }
-        public decimal Valor { get; set; }
+    <h2 id="der">🗄️ Etapa 2: Diagrama de Entidade e Relacionamento (DER)</h2>
+    <p>A estrutura do nosso banco de dados contempla as seguintes entidades e relacionamentos:</p>
+    <ul>
+        <li><strong>Cliente</strong> (<u>Codigo</u>, Nome, Cpf, Telefone, DataNascimento)</li>
+        <li><strong>Veterinario</strong> (<u>Codigo</u>, Nome, Crmv, Especialidade)</li>
+        <li><strong>ReservaServico</strong> (<u>Codigo</u>, DataHora, Valor, StatusServico, ClienteId, VeterinarioId)</li>
+    </ul>
 
-        public Procedimento(string nome, decimal valor)
-        {
-            Nome = nome;
-            Valor = valor;
-        }
+    <div class="callout callout-warning">
+        <strong>Atenção Profissional:</strong> No mercado de trabalho, o foco deve ser na entrega do que foi solicitado no escopo. Evite adicionar tabelas ou campos sem o devido alinhamento com sua supervisão.
+    </div>
 
-        // Clonagem Manual: Criamos uma NOVA instância usando 'new'
-        public Procedimento Clonar()
-        {
-            Procedimento novoProcedimento = new Procedimento(this.Nome, this.Valor);
-            return novoProcedimento;
-        }
+    <hr>
+
+    <h2 id="script-sql">🗄️ Etapa 2B: Criação do Banco de Dados via Script SQL</h2>
+    <p>Execute o script SQL abaixo no SSMS para criar o banco <code>dbPetShop</code>, suas tabelas, chaves primárias/estrangeiras e dados de teste iniciais:</p>
+
+<pre><code>CREATE DATABASE dbPetShop;
+GO
+USE dbPetShop;
+GO
+
+-- Tabela Cliente
+CREATE TABLE Cliente (
+    Codigo INT IDENTITY(1,1) PRIMARY KEY,
+    Nome VARCHAR(100) NOT NULL,
+    Cpf VARCHAR(14) NOT NULL UNIQUE,
+    Telefone VARCHAR(20) NOT NULL,
+    DataNascimento DATE NOT NULL
+);
+GO
+
+-- Tabela Veterinario
+CREATE TABLE Veterinario (
+    Codigo INT IDENTITY(1,1) PRIMARY KEY,
+    Nome VARCHAR(100) NOT NULL,
+    Crmv VARCHAR(20) NOT NULL UNIQUE,
+    Especialidade VARCHAR(50) NOT NULL
+);
+GO
+
+-- Tabela ReservaServico
+CREATE TABLE ReservaServico (
+    Codigo INT IDENTITY(1,1) PRIMARY KEY,
+    DataHora DATETIME NOT NULL,
+    Valor DECIMAL(10,2) NOT NULL,
+    StatusServico VARCHAR(30) NOT NULL,
+    ClienteId INT NOT NULL,
+    VeterinarioId INT NOT NULL,
+    CONSTRAINT FK_ReservaServico_Cliente FOREIGN KEY (ClienteId) 
+        REFERENCES Cliente(Codigo),
+    CONSTRAINT FK_ReservaServico_Veterinario FOREIGN KEY (VeterinarioId) 
+        REFERENCES Veterinario(Codigo)
+);
+GO
+
+-- Inserindo Dados Iniciais para Teste
+INSERT INTO Cliente (Nome, Cpf, Telefone, DataNascimento) VALUES 
+('Maria Oliveira', '111.222.333-44', '(11) 98888-7777', '1990-05-15'),
+('João Souza', '555.666.777-88', '(11) 97777-6666', '1985-10-20');
+
+INSERT INTO Veterinario (Nome, Crmv, Especialidade) VALUES 
+('Dra. Helena Rios', 'CRMV/SP 12345', 'Dermatologia Veterinaria'),
+('Dr. Roberto Alves', 'CRMV/SP 65432', 'Ortopedia Veterinaria');
+
+INSERT INTO ReservaServico (DataHora, Valor, StatusServico, ClienteId, VeterinarioId) VALUES 
+('2026-10-15 14:00:00', 180.00, 'Agendada', 1, 1),
+('2026-10-16 09:30:00', 250.00, 'Agendada', 2, 2);
+GO
+</code></pre>
+
+    <h3 id="csv">📁 Importação de Dados via Arquivo CSV (Exemplo: <code>veterinarios.csv</code>)</h3>
+    <p>Para praticar a importação de dados no SQL Server via SSMS (menu <em>Tarefas > Importar Dados</em> com <code>Flat File Source</code>), utilize o modelo CSV abaixo para cadastrar veterinários em lote:</p>
+
+<pre><code>Nome,Crmv,Especialidade
+Dra. Camila Mendes,CRMV/SP 11223,Clínica Geral
+Dr. Fernando Costa,CRMV/SP 44556,Oftalmologia Veterinária
+Dra. Patricia Lima,CRMV/SP 77889,Cardiologia Veterinária
+Dr. Marcelo Santos,CRMV/SP 99001,Odontologia Veterinária
+Dra. Juliana Rocha,CRMV/SP 33445,Oncologia Veterinária
+</code></pre>
+
+    <hr>
+
+    <h2 id="aspnet">📦 Etapa 3: Criando o Projeto ASP.NET Core no Visual Studio</h2>
+    <ol>
+        <li>Abra o Visual Studio 2022.</li>
+        <li>Clique em <strong>Criar um novo projeto</strong>.</li>
+        <li>Selecione o modelo <strong>Aplicação Web do ASP.NET Core (Model-View-Controller)</strong> e avance.</li>
+        <li>Nomeie o projeto como <code>appPetShop</code>.</li>
+        <li>Selecione o Framework <strong>.NET 9.0</strong> e clique em <strong>Criar</strong>.</li>
+    </ol>
+
+    <h2>📦 Etapa 4: Instalação dos Pacotes do Entity Framework via NuGet</h2>
+    <p>Instale os pacotes NuGet adequados à versão do seu projeto (.NET 9):</p>
+    <ul>
+        <li><code>Microsoft.EntityFrameworkCore.SqlServer</code></li>
+        <li><code>Microsoft.EntityFrameworkCore.Tools</code></li>
+        <li><code>Microsoft.VisualStudio.Web.CodeGeneration.Design</code></li>
+    </ul>
+
+    <h2>⚙️ Etapa 5: Configuração da String de Conexão no <code>appsettings.json</code></h2>
+    <p>Atualize o arquivo <code>appsettings.json</code> com as credenciais do seu banco de dados:</p>
+
+<pre><code>{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
     }
-}</code></pre>
-    </section>
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "ConexaoSqlServer": "Server=.\\SENAI; Database=dbPetShop; User Id=sa; Password=senai.123; TrustServerCertificate=True;"
+  }
+}
+</code></pre>
 
-    <section id="etapa2">
-      <h2>📂 Etapa 2: Implementando a Classe PacoteExame</h2>
-      <p>Crie o arquivo <code>PacoteExame.cs</code> na pasta <code>Models</code>. Aqui implementaremos manualmente a <strong>Cópia Profunda (Deep Copy)</strong> e a <strong>Cópia Superficial (Shallow Copy)</strong> para comparar seus comportamentos.</p>
-      <pre><code>using System;
-using System.Collections.Generic;
+    <h2>🔨 Etapa 6: Engenharia Reversa (Scaffolding Database First)</h2>
+    <p>Abra o <strong>Console do Gerenciador de Pacotes</strong> e execute o comando abaixo para gerar os Models a partir do banco de dados:</p>
 
-namespace ClinicaPOO.Models
+<pre><code>Scaffold-DbContext "Name=ConexaoSqlServer" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Force
+</code></pre>
+
+    <div class="callout">
+        <strong>Ajuste de Nomeclatura:</strong> Caso a classe de contexto seja gerada como <code>DbPetShopContext</code> e a model do serviço seja gerada no singular como <code>ReservaServico</code>, certifique-se de que os nomes das classes estejam padronizados e alinhados com as tabelas.
+    </div>
+
+    <h2>🔨 Etapa 7: Compilação e Registro no <code>Program.cs</code></h2>
+    <p>Recompile a solução (<code>Ctrl + Shift + B</code>) e registre o contexto na injeção de dependência no arquivo <code>Program.cs</code>:</p>
+
+<pre><code>using Microsoft.EntityFrameworkCore;
+using appPetShop.Models;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext&lt;DbPetShopContext&gt;(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ConexaoSqlServer")));
+
+var app = builder.Build();
+</code></pre>
+
+    <h2>🎨 Etapa 8: Gerando o CRUD Automático (Scaffolding MVC)</h2>
+    <ol>
+        <li>Na pasta <code>Controllers</code>, clique com o botão direito > <strong>Adicionar</strong> > <strong>Item do Scaffolding...</strong></li>
+        <li>Escolha <strong>Controlador MVC com exibições, usando o Entity Framework</strong>.</li>
+        <li>Gere os controllers para <code>Cliente</code>, <code>Veterinario</code> e <code>ReservaServico</code>.</li>
+    </ol>
+
+    <hr>
+
+    <h2 id="autenticacao">🔒 Etapa 9: Implementando Autenticação por Cookie para Clientes</h2>
+
+    <h3>1. View Model de Login (<code>LoginViewModel.cs</code>)</h3>
+<pre><code>using System.ComponentModel.DataAnnotations;
+
+namespace appPetShop.Models
 {
-    public class PacoteExame
+    public class LoginViewModel
     {
-        public string NomePacote { get; set; }
-        public string OrientacoesJejum { get; set; }
-        public string NomePaciente { get; set; }
-        public List&lt;Procedimento&gt; Procedimentos { get; set; }
+        [Required(ErrorMessage = "O CPF é obrigatório.")]
+        [Display(Name = "CPF do Cliente")]
+        public string Cpf { get; set; } = string.Empty;
+    }
+}
+</code></pre>
 
-        public PacoteExame(string nomePacote, string orientacoesJejum)
+    <h3>2. Controller de Autenticação (<code>AccountController.cs</code>)</h3>
+<pre><code>using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using appPetShop.Models;
+
+namespace appPetShop.Controllers
+{
+    public class AccountController : Controller
+    {
+        private readonly DbPetShopContext _context;
+
+        public AccountController(DbPetShopContext context)
         {
-            NomePacote = nomePacote;
-            OrientacoesJejum = orientacoesJejum;
-            NomePaciente = "NÃO ATRIBUÍDO";
-            Procedimentos = new List&lt;Procedimento&gt;();
+            _context = context;
         }
 
-        public void AdicionarProcedimento(Procedimento procedimento)
+        [HttpGet]
+        public IActionResult Login()
         {
-            Procedimentos.Add(procedimento);
-        }
-
-        // 1. CÓPIA PROFUNDA (DEEP COPY) - O Jeito Correto!
-        public PacoteExame Clonar()
-        {
-            PacoteExame pacoteClonado = new PacoteExame(this.NomePacote, this.OrientacoesJejum);
-            pacoteClonado.NomePaciente = this.NomePaciente;
-
-            // Percorremos a lista original e clonamos item por item para a nova lista
-            foreach (Procedimento item in this.Procedimentos)
+            if (User.Identity != null && User.Identity.IsAuthenticated)
             {
-                Procedimento itemCopia = item.Clonar(); // Instancia um novo procedimento
-                pacoteClonado.Procedimentos.Add(itemCopia);
+                return RedirectToAction("Index", "ReservaServico");
+            }
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task&lt;IActionResult&gt; Login(LoginViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var cliente = await _context.Clientes
+                .FirstOrDefaultAsync(c => c.Cpf == model.Cpf);
+
+            if (cliente == null)
+            {
+                ModelState.AddModelError("", "CPF não encontrado. Faça seu cadastro primeiro.");
+                return View(model);
             }
 
-            return pacoteClonado;
-        }
-
-        // 2. CÓPIA SUPERFICIAL (SHALLOW COPY) - Exemplo de Erro
-        public PacoteExame ClonarSuperficial()
-        {
-            PacoteExame pacoteRaso = new PacoteExame(this.NomePacote, this.OrientacoesJejum);
-            pacoteRaso.NomePaciente = this.NomePaciente;
-            
-            // PERIGO: Reutiliza a mesma referência da lista!
-            pacoteRaso.Procedimentos = this.Procedimentos; 
-
-            return pacoteRaso;
-        }
-
-        public void ExibirResumo()
-        {
-            Console.WriteLine($"\n[PACOTE]: {NomePacote} | Paciente: {NomePaciente}");
-            Console.WriteLine($"  Orientação: {OrientacoesJejum}");
-            Console.WriteLine("  Procedimentos inclusos:");
-            decimal total = 0;
-            foreach (var p in Procedimentos)
+            var claims = new List&lt;Claim&gt;
             {
-                Console.WriteLine($"   - {p.Nome}: R$ {p.Valor:F2}");
-                total += p.Valor;
-            }
-            Console.WriteLine($"  Total: R$ {total:F2}");
+                new Claim(ClaimTypes.NameIdentifier, cliente.Codigo.ToString()),
+                new Claim(ClaimTypes.Name, cliente.Nome),
+                new Claim("CPF", cliente.Cpf)
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity));
+
+            return RedirectToAction("Index", "ReservaServico");
+        }
+
+        public async Task&lt;IActionResult&gt; Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login");
         }
     }
-}</code></pre>
-    </section>
+}
+</code></pre>
 
-    <section id="etapa3">
-      <h2>📂 Etapa 3: Gerenciador de Protótipos (Prototype Registry)</h2>
-      <p>Crie o arquivo <code>GerenciadorPrototipos.cs</code> na pasta <code>Services</code>. Esta classe serve como um catálogo central onde os modelos ficam guardados.</p>
-      <pre><code>using System.Collections.Generic;
-using ClinicaPOO.Models;
-
-namespace ClinicaPOO.Services
-{
-    public class GerenciadorPrototipos
+    <h3>3. Configuração no <code>Program.cs</code> e Proteção com <code>[Authorize]</code></h3>
+<pre><code>// No Program.cs:
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
     {
-        private Dictionary&lt;string, PacoteExame&gt; _prototipos = new Dictionary&lt;string, PacoteExame&gt;();
+        options.LoginPath = "/Account/Login";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+    });
 
-        public void CadastrarPrototipo(string chave, PacoteExame prototipo)
-        {
-            _prototipos[chave] = prototipo;
-        }
+// Ativação dos middlewares:
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+</code></pre>
 
-        public PacoteExame ObterClone(string chave)
-        {
-            if (_prototipos.ContainsKey(chave))
-            {
-                PacoteExame modeloOriginal = _prototipos[chave];
-                return modeloOriginal.Clonar();
+    <p>Adicione o atributo na controller de reservas (<code>ReservaServicoController.cs</code>):</p>
+<pre><code>[Authorize]
+public class ReservaServicoController : Controller
+{
+    // Ações do controller protegidas...
+}
+</code></pre>
+
+    <hr>
+
+    <h2 id="questionario">📝 Questionário Interativo de Fixação (10 Questões)</h2>
+    <p>Responda às questões abaixo para testar seus conhecimentos obtidos na aula prática de PetShop:</p>
+
+    <div class="quiz-container">
+        <form id="quiz-form">
+            <!-- Questão 1 -->
+            <div class="quiz-question">
+                <p>1. Qual das alternativas representa um Requisito Funcional no sistema do PetShop?</p>
+                <label class="quiz-option"><input type="radio" name="q1" value="A"> A) O banco de dados deve ser o SQL Server.</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="B"> B) O sistema deve permitir agendar uma reserva vinculando 1 Cliente e 1 Veterinário.</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="C"> C) A aplicação deve ser desenvolvida em C# com .NET 9.</label>
+                <label class="quiz-option"><input type="radio" name="q1" value="D"> D) A página deve responder em menos de 2 segundos.</label>
+            </div>
+
+            <!-- Questão 2 -->
+            <div class="quiz-question">
+                <p>2. No comando de criação da tabela ReservaServico, qual instrução garante a integridade referencial com a tabela Cliente?</p>
+                <label class="quiz-option"><input type="radio" name="q2" value="A"> A) PRIMARY KEY (ClienteId)</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="B"> B) CONSTRAINT FK_ReservaServico_Cliente FOREIGN KEY (ClienteId) REFERENCES Cliente(Codigo)</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="C"> C) UNIQUE (ClienteId)</label>
+                <label class="quiz-option"><input type="radio" name="q2" value="D"> D) CHECK (ClienteId IS NOT NULL)</label>
+            </div>
+
+            <!-- Questão 3 -->
+            <div class="quiz-question">
+                <p>3. Qual tipo de dado do SQL Server foi utilizado para armazenar o campo 'Valor' da reserva?</p>
+                <label class="quiz-option"><input type="radio" name="q3" value="A"> A) VARCHAR(10)</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="B"> B) INT</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="C"> C) DECIMAL(10,2)</label>
+                <label class="quiz-option"><input type="radio" name="q3" value="D"> D) FLOAT</label>
+            </div>
+
+            <!-- Questão 4 -->
+            <div class="quiz-question">
+                <p>4. Qual é o objetivo da ferramenta de Engenharia Reversa (Scaffold-DbContext) no Entity Framework Core?</p>
+                <label class="quiz-option"><input type="radio" name="q4" value="A"> A) Criar o banco de dados SQL Server a partir das classes C#.</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="B"> B) Gerar as tabelas do banco de dados automaticamente durante a execução.</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="C"> C) Mapear um banco de dados existente gerando as classes de modelo (Models) e o DbContext.</label>
+                <label class="quiz-option"><input type="radio" name="q4" value="D"> D) Compilar o projeto ASP.NET Core sem erros.</label>
+            </div>
+
+            <!-- Questão 5 -->
+            <div class="quiz-question">
+                <p>5. Para proteger um Controller e exigir que o usuário esteja autenticado no ASP.NET MVC, qual atributo é utilizado?</p>
+                <label class="quiz-option"><input type="radio" name="q5" value="A"> A) [HttpGet]</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="B"> B) [Authorize]</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="C"> C) [Required]</label>
+                <label class="quiz-option"><input type="radio" name="q5" value="D"> D) [ValidateAntiForgeryToken]</label>
+            </div>
+
+            <!-- Questão 6 -->
+            <div class="quiz-question">
+                <p>6. No arquivo Program.cs, qual a ordem correta na chamada dos middlewares de segurança?</p>
+                <label class="quiz-option"><input type="radio" name="q6" value="A"> A) app.UseAuthorization(); depois app.UseAuthentication();</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="B"> B) app.UseAuthentication(); depois app.UseAuthorization();</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="C"> C) A ordem não importa no pipeline do ASP.NET Core.</label>
+                <label class="quiz-option"><input type="radio" name="q6" value="D"> D) Apenas app.UseAuthorization() é necessário.</label>
+            </div>
+
+            <!-- Questão 7 -->
+            <div class="quiz-question">
+                <p>7. Para preencher automaticamente a chave primária sequencial da tabela Cliente no SQL Server, qual propriedade é aplicada à coluna Codigo?</p>
+                <label class="quiz-option"><input type="radio" name="q7" value="A"> A) AUTO_INCREMENT</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="B"> B) IDENTITY(1,1)</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="C"> C) SEQUENCE</label>
+                <label class="quiz-option"><input type="radio" name="q7" value="D"> D) DEFAULT(1)</label>
+            </div>
+
+            <!-- Questão 8 -->
+            <div class="quiz-question">
+                <p>8. Qual recurso do ASP.NET MVC é utilizado para validar o formulário no lado do cliente e no servidor a partir das propriedades das Models?</p>
+                <label class="quiz-option"><input type="radio" name="q8" value="A"> A) Data Annotations</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="B"> B) Scaffolding</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="C"> C) DbContext</label>
+                <label class="quiz-option"><input type="radio" name="q8" value="D"> D) Connection Strings</label>
+            </div>
+
+            <!-- Questão 9 -->
+            <div class="quiz-question">
+                <p>9. Qual função das Claims no mecanismo de CookieAuthentication?</p>
+                <label class="quiz-option"><input type="radio" name="q9" value="A"> A) Salvar os scripts SQL de migração.</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="B"> B) Guardar declarações/informações sobre o usuário autenticado (como ID, Nome e CPF).</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="C"> C) Conectar a aplicação com o servidor SQL Server.</label>
+                <label class="quiz-option"><input type="radio" name="q9" value="D"> D) Gerar o layout HTML das views automaticamente.</label>
+            </div>
+
+            <!-- Questão 10 -->
+            <div class="quiz-question">
+                <p>10. Ao tentar excluir um Veterinário que já possui reservas cadastradas, o que deve ocorrer com base no requisito R5 (Integridade Relacional)?</p>
+                <label class="quiz-option"><input type="radio" name="q10" value="A"> A) O banco de dados exclui o veterinário e todas as suas reservas silenciosamente.</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="B"> B) O banco lança um erro de restrição de chave estrangeira bloqueando a exclusão.</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="C"> C) O sistema substitui o veterinário excluído por um valor nulo na reserva.</label>
+                <label class="quiz-option"><input type="radio" name="q10" value="D"> D) A tabela de reservas é apagada por completo.</label>
+            </div>
+
+            <button type="button" class="btn-submit" onclick="calcularPontuacao()">Enviar Resposta</button>
+        </form>
+
+        <div id="quiz-result"></div>
+    </div>
+</div>
+
+<script>
+    function calcularPontuacao() {
+        const respostasCorretas = {
+            q1: "B",
+            q2: "B",
+            q3: "C",
+            q4: "C",
+            q5: "B",
+            q6: "B",
+            q7: "B",
+            q8: "A",
+            q9: "B",
+            q10: "B"
+        };
+
+        let acertos = 0;
+        let totalPerguntas = 10;
+
+        for (let i = 1; i <= totalPerguntas; i++) {
+            const opcaoSelecionada = document.querySelector(`input[name="q${i}"]:checked`);
+            if (opcaoSelecionada && opcaoSelecionada.value === respostasCorretas[`q${i}`]) {
+                acertos++;
             }
-
-            return null;
         }
-    }
-}</code></pre>
-    </section>
 
-    <section id="etapa4">
-      <h2>📂 Etapa 4: Executando e Testando a Aplicação (Program.cs)</h2>
-      <p>Monte o fluxo principal do programa simulando os atendimentos e verificando o isolamento dos dados em memória.</p>
-      <pre><code>using System;
-using ClinicaPOO.Models;
-using ClinicaPOO.Services;
+        const divResultado = document.getElementById("quiz-result");
+        divResultado.style.display = "block";
 
-Console.WriteLine("=== SISTEMA DA CLÍNICA VIDA & SAÚDE - PATTERN PROTOTYPE ===\n");
+        const porcentagem = (acertos / totalPerguntas) * 100;
 
-GerenciadorPrototipos gerenciador = new GerenciadorPrototipos();
-
-// 1. CONFIGURAÇÃO DOS MODELOS BASE (Protótipos)
-PacoteExame checkupCardio = new PacoteExame("Check-up Cardiológico", "Jejum de 8h e evitar cafeína");
-checkupCardio.AdicionarProcedimento(new Procedimento("Eletrocardiograma", 150.00m));
-checkupCardio.AdicionarProcedimento(new Procedimento("Ecocardiograma", 350.00m));
-
-gerenciador.CadastrarPrototipo("CARDIO_PADRAO", checkupCardio);
-
-// 2. USO CORRETO: Clonando via Cópia Profunda (Deep Copy)
-PacoteExame atendimento1 = gerenciador.ObterClone("CARDIO_PADRAO");
-atendimento1.NomePaciente = "Carlos Eduardo";
-atendimento1.AdicionarProcedimento(new Procedimento("Holter 24h", 250.00m));
-
-// 3. DEMONSTRAÇÃO DO ERRO DA CÓPIA SUPERFICIAL
-PacoteExame modeloOriginal = gerenciador.ObterClone("CARDIO_PADRAO");
-PacoteExame atendimentoErro = modeloOriginal.ClonarSuperficial();
-atendimentoErro.NomePaciente = "Ana Maria";
-atendimentoErro.AdicionarProcedimento(new Procedimento("Glicemia em Jejum", 30.00m));
-
-// Exibindo resultados...
-atendimento1.ExibirResumo();
-modeloOriginal.ExibirResumo(); // A alteração afetou o modelo original na cópia rasa!</code></pre>
-    </section>
-
-    <section id="diagrama">
-      <h2>📊 Mapeamento Visual em Memória</h2>
-      <div class="svg-container">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="100%" height="100%">
-          <defs>
-            <linearGradient id="protoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#1e293b" />
-              <stop offset="100%" stop-color="#334155" />
-            </linearGradient>
-            <linearGradient id="deepGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#064e3b" />
-              <stop offset="100%" stop-color="#022c22" />
-            </linearGradient>
-            <linearGradient id="shallowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#7f1d1d" />
-              <stop offset="100%" stop-color="#450a0a" />
-            </linearGradient>
-            <marker id="arrowGreen" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#10b981" />
-            </marker>
-            <marker id="arrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444" />
-            </marker>
-          </defs>
-
-          <text x="480" y="45" text-anchor="middle" fill="#f8fafc" font-size="20" font-weight="700">Mapeamento em Memória: Método Manual Clonar()</text>
-
-          <!-- Protótipo -->
-          <g transform="translate(50, 90)">
-            <rect x="0" y="0" width="260" height="420" rx="12" fill="url(#protoGrad)" stroke="#3b82f6" stroke-width="2" />
-            <path d="M 0 12 Q 0 0 12 0 L 248 0 Q 260 0 260 12 L 260 45 L 0 45 Z" fill="#2563eb" />
-            <text x="130" y="28" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700">PROTÓTIPO ORIGINAL</text>
-            <text x="20" y="75" fill="#94a3b8" font-size="11">Instância PacoteExame</text>
-            <text x="20" y="95" fill="#f1f5f9" font-size="13" font-weight="bold">"Check-up Cardiológico"</text>
-            <rect x="15" y="145" width="230" height="250" rx="8" fill="#0f172a" stroke="#64748b" stroke-dasharray="3 3" />
-            <text x="25" y="170" fill="#38bdf8" font-size="11" font-weight="700">📍 List&lt;Procedimento&gt; (Lista A)</text>
-            <rect x="25" y="190" width="210" height="40" rx="4" fill="#1e293b" />
-            <text x="35" y="215" fill="#e2e8f0" font-size="11">Eletrocardiograma | R$ 150</text>
-            <rect x="25" y="240" width="210" height="40" rx="4" fill="#1e293b" />
-            <text x="35" y="265" fill="#e2e8f0" font-size="11">Ecocardiograma | R$ 350</text>
-            <text x="130" y="380" text-anchor="middle" fill="#38bdf8" font-size="11" font-weight="bold">Heap: Endereço 0x10A</text>
-          </g>
-
-          <!-- Deep Copy -->
-          <g transform="translate(430, 90)">
-            <rect x="0" y="0" width="480" height="200" rx="12" fill="url(#deepGrad)" stroke="#10b981" stroke-width="2" />
-            <rect x="300" y="12" width="165" height="24" rx="12" fill="#10b981" />
-            <text x="382" y="28" text-anchor="middle" fill="#022c22" font-size="11" font-weight="800">DEEP COPY (CORRETO)</text>
-            <text x="20" y="35" fill="#a7f3d0" font-size="14" font-weight="bold">Atendimento 1: "Carlos Eduardo"</text>
-            <rect x="20" y="60" width="440" height="120" rx="8" fill="#022c22" stroke="#059669" />
-            <text x="35" y="85" fill="#34d399" font-size="11" font-weight="700">📍 NOVA Lista em Memória (Lista B)</text>
-            <text x="35" y="110" fill="#e2e8f0" font-size="11">• Eletrocardiograma (Novo objeto via Clonar())</text>
-            <text x="35" y="130" fill="#e2e8f0" font-size="11">• Ecocardiograma (Novo objeto via Clonar())</text>
-            <text x="35" y="155" fill="#fde047" font-size="11" font-weight="bold">➕ Holter 24h (Adicionado APENAS na Lista B)</text>
-            <text x="440" y="170" text-anchor="end" fill="#34d399" font-size="10">Heap: Endereço 0x99B</text>
-          </g>
-
-          <!-- Shallow Copy -->
-          <g transform="translate(430, 310)">
-            <rect x="0" y="0" width="480" height="200" rx="12" fill="url(#shallowGrad)" stroke="#ef4444" stroke-width="2" />
-            <rect x="290" y="12" width="175" height="24" rx="12" fill="#ef4444" />
-            <text x="377" y="28" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="800">SHALLOW COPY (ERRO)</text>
-            <text x="20" y="35" fill="#fecaca" font-size="14" font-weight="bold">Atendimento 2: "Ana Maria"</text>
-            <rect x="20" y="60" width="440" height="120" rx="8" fill="#450a0a" stroke="#dc2626" />
-            <text x="35" y="85" fill="#fca5a5" font-size="11" font-weight="700">⚠️ APONTA PARA A MESMA LISTA DO PROTÓTIPO (Lista A)</text>
-            <text x="35" y="110" fill="#94a3b8" font-size="11">• Eletrocardiograma</text>
-            <text x="35" y="130" fill="#94a3b8" font-size="11">• Ecocardiograma</text>
-            <text x="35" y="155" fill="#ef4444" font-size="11" font-weight="bold">⚠️ Glicemia em Jejum (Injetado diretamente na Lista A!)</text>
-            <text x="440" y="170" text-anchor="end" fill="#fca5a5" font-size="10">Heap: Reutiliza 0x10A</text>
-          </g>
-
-          <!-- Setas -->
-          <path d="M 310 180 Q 360 160 420 160" fill="none" stroke="#10b981" stroke-width="3" marker-end="url(#arrowGreen)" />
-          <path d="M 310 380 Q 360 410 420 410" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="5 5" marker-end="url(#arrowRed)" />
-        </svg>
-      </div>
-    </section>
-
-    <section id="desafios">
-      <h2>🚀 Desafios Extras: Pesquise e Evolua seu Código</h2>
-      <p>Pesquise sobre as seguintes evoluções no ecossistema C#:</p>
-      <ul>
-        <li><strong>🟢 Desafio 1 (Padronização com <code>ICloneable</code>):</strong> Altere suas classes para implementarem a interface nativa <code>System.ICloneable</code> e o método <code>object Clone()</code>.</li>
-        <li><strong>🟡 Desafio 2 (Atalho com <code>MemberwiseClone()</code>):</strong> Pesquise o que faz o método <code>MemberwiseClone()</code> do .NET e como ele facilita a cópia superficial de propriedades.</li>
-        <li><strong>🔴 Desafio 3 (Tipagem Forte com Generics):</strong> Crie uma interface <code>IPrototipo&lt;T&gt;</code> para evitar o uso de <em>casts</em> manuais no C#.</li>
-      </ul>
-    </section>
-
-    <!-- Seção do Quiz Interativo -->
-    <section id="simulado" class="quiz-section">
-      <h2>📝 Simulado de Fixação (5 Questões)</h2>
-      <form id="quiz-form">
-        
-        <div class="question">
-          <p>1. Qual é a principal motivação para utilizar o Design Pattern Prototype?</p>
-          <div class="options">
-            <label><input type="radio" name="q1" value="A"> A) Persistir objetos diretamente em um banco de dados relacional.</label>
-            <label><input type="radio" name="q1" value="B"> B) Criar novos objetos copiando instâncias pré-configuradas em memória, evitando reconstruções custosas do zero.</label>
-            <label><input type="radio" name="q1" value="C"> C) Garantir que uma classe tenha apenas uma única instância em toda a aplicação.</label>
-            <label><input type="radio" name="q1" value="D"> D) Converter a interface de uma classe em outra interface esperada pelos clientes.</label>
-          </div>
-        </div>
-
-        <div class="question">
-          <p>2. No contexto de orientação a objetos, qual é a diferença entre Shallow Copy (Cópia Superficial) e Deep Copy (Cópia Profunda)?</p>
-          <div class="options">
-            <label><input type="radio" name="q2" value="A"> A) Shallow Copy duplica apenas os métodos, enquanto Deep Copy duplica apenas as propriedades.</label>
-            <label><input type="radio" name="q2" value="B"> B) Shallow Copy duplica objetos internos; Deep Copy apenas copia o tipo por valor.</label>
-            <label><input type="radio" name="q2" value="C"> C) Shallow Copy copia valores primitivos mas compartilha referências de objetos aninhados/listas; Deep Copy cria novas instâncias de tudo, isolando o clone.</label>
-            <label><input type="radio" name="q2" value="D"> D) Não há diferença prática em C#.</label>
-          </div>
-        </div>
-
-        <div class="question">
-          <p>3. Na nossa implementação manual, o que acontece ao executar o comando `new List<Procedimento>()` dentro do método `Clonar()` da classe `PacoteExame`?</p>
-          <div class="options">
-            <label><input type="radio" name="q3" value="A"> A) Apaga os dados do objeto original.</label>
-            <label><input type="radio" name="q3" value="B"> B) Garante a criação de um novo endereço de memória para a lista do objeto clonado, impedindo que alterações no clone afetem o modelo original.</label>
-            <label><input type="radio" name="q3" value="C"> C) Causa um erro de compilação por tentar instanciar uma interface.</label>
-            <label><input type="radio" name="q3" value="D"> D) Conecta a lista diretamente com o banco de dados.</label>
-          </div>
-        </div>
-
-        <div class="question">
-          <p>4. Para que serve a classe `GerenciadorPrototipos` (Prototype Registry) na estrutura do projeto?</p>
-          <div class="options">
-            <label><input type="radio" name="q4" value="A"> A) Serve como um repositório/catálogo central para armazenar e fornecer os modelos base pré-configurados prontos para clonagem.</label>
-            <label><input type="radio" name="q4" value="B"> B) Para validar o CPF e o nome dos pacientes cadastrados.</label>
-            <label><input type="radio" name="q4" value="C"> C) Para destruir objetos não utilizados da memória através do Garbage Collector.</label>
-            <label><input type="radio" name="q4" value="D"> D) Para criptografar os exames médicos dos pacientes.</label>
-          </div>
-        </div>
-
-        <div class="question">
-          <p>5. Se na classe `PacoteExame` fizéssemos `pacoteClonado.Procedimentos = this.Procedimentos;`, qual seria o problema gerado?</p>
-          <div class="options">
-            <label><input type="radio" name="q5" value="A"> A) O código não compilaria porque os tipos são incompatíveis.</label>
-            <label><input type="radio" name="q5" value="B"> B) Seria gerada uma Cópia Superficial, fazendo com que qualquer novo exame adicionado ao paciente alterasse também o modelo base cadastrado na clínica.</label>
-            <label><input type="radio" name="q5" value="C"> C) Os exames do modelo base seriam excluídos automaticamente.</label>
-            <label><input type="radio" name="q5" value="D"> D) A lista de procedimentos ficaria nula (null).</label>
-          </div>
-        </div>
-
-        <button type="button" class="btn-quiz" onclick="calcularResultado()">Finalizar Simulado</button>
-      </form>
-
-      <div id="quiz-result"></div>
-    </section>
-  </main>
-
-  <script>
-    function calcularResultado() {
-      // Gabarito correto: 1:B, 2:C, 3:B, 4:A, 5:B
-      const respostasCorretas = {
-        q1: 'B',
-        q2: 'C',
-        q3: 'B',
-        q4: 'A',
-        q5: 'B'
-      };
-
-      let acertos = 0;
-      let totalQuestoes = 5;
-      let form = document.getElementById('quiz-form');
-
-      for (let i = 1; i <= totalQuestoes; i++) {
-        let questao = 'q' + i;
-        let selecionado = form.elements[questao].value;
-
-        if (selecionado === respostasCorretas[questao]) {
-          acertos++;
+        if (acertos >= 7) {
+            divResultado.className = "result-success";
+            divResultado.innerHTML = `🎉 Parabéns! Você acertou <strong>${acertos}</strong> de <strong>${totalPerguntas}</strong> questões (${porcentagem}% de aproveitamento). Excelente domínio do conteúdo!`;
+        } else {
+            divResultado.className = "result-warning";
+            divResultado.innerHTML = `⚠️ Você acertou <strong>${acertos}</strong> de <strong>${totalPerguntas}</strong> questões (${porcentagem}% de aproveitamento). Revise os tópicos do guia e tente novamente!`;
         }
-      }
 
-      let divResultado = document.getElementById('quiz-result');
-      divResultado.style.display = 'block';
-
-      if (acertos >= 4) {
-        divResultado.className = 'result-success';
-        divResultado.innerHTML = `🎉 <strong>Excelente desempenho!</strong> Você acertou ${acertos} de ${totalQuestoes} questões. Você dominou o conceito do Pattern Prototype e gerenciamento de memória em C#!`;
-      } else {
-        divResultado.className = 'result-warning';
-        divResultado.innerHTML = `⚠️ <strong>Atenção:</strong> Você acertou ${acertos} de ${totalQuestoes} questões. Revise os conceitos de Deep Copy vs Shallow Copy no texto acima e tente novamente.`;
-      }
+        divResultado.scrollIntoView({ behavior: 'smooth' });
     }
-  </script>
+</script>
+
 </body>
 </html>
