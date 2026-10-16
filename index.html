@@ -39,7 +39,7 @@
             background-color: var(--bg-body);
             color: var(--text-main);
             line-height: 1.6;
-            padding-top: 70px; /* Espaço para o menu fixo */
+            padding-top: 70px;
         }
 
         /* Menu de Navegação Fixo */
@@ -125,7 +125,7 @@
             margin-bottom: 15px;
             border-left: 4px solid var(--secondary);
             padding-left: 10px;
-            scroll-margin-top: 80px; /* Offset para o cabeçalho não cobrir o título ao rolar */
+            scroll-margin-top: 80px;
         }
 
         h3 {
@@ -299,8 +299,8 @@
             font-size: 0.95rem;
         }
 
-        /* Questionário */
-        .quiz-container {
+        /* Questionário e Simulado */
+        .quiz-container, .simulado-container {
             background-color: #f8fafc;
             border: 1px solid var(--border-color);
             padding: 25px;
@@ -333,6 +333,23 @@
             margin-right: 8px;
         }
 
+        .simulado-table select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            background-color: #fff;
+        }
+
+        .simulado-feedback {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .text-correct { color: var(--success); }
+        .text-wrong { color: var(--danger); }
+
         .btn-submit {
             background-color: var(--primary);
             color: white;
@@ -351,7 +368,7 @@
             background-color: var(--primary-hover);
         }
 
-        #quiz-result {
+        #quiz-result, #simulado-result {
             margin-top: 20px;
             padding: 15px;
             border-radius: 6px;
@@ -385,9 +402,9 @@
             <li><a href="#der">DER</a></li>
             <li><a href="#script-sql">Script SQL</a></li>
             <li><a href="#csv">CSV</a></li>
-            <li><a href="#aspnet">ASP.NET Core</a></li>
             <li><a href="#autenticacao">Autenticação</a></li>
             <li><a href="#questionario">Questionário</a></li>
+            <li><a href="#simulado-tipos">Simulado Tipos SQL</a></li>
         </ul>
     </div>
 </nav>
@@ -465,7 +482,7 @@
 
     <p>Clique nas tabelas abaixo para inspecionar seus detalhes e os relacionamentos do banco de dados <code>dbPetShop</code>:</p>
 
-    <!-- DER Interativo -->
+    <!-- DER Interativo Nativo em HTML/CSS/JS -->
     <div class="der-wrapper">
         <div class="der-diagram">
             <!-- Tabela Cliente -->
@@ -861,10 +878,196 @@ public class ReservaServicoController : Controller
                 <label class="quiz-option"><input type="radio" name="q10" value="D"> D) A tabela de reservas é apagada por completo.</label>
             </div>
 
-            <button type="button" class="btn-submit" onclick="calcularPontuacao()">Enviar Resposta</button>
+            <button type="button" class="btn-submit" onclick="calcularPontuacao()">Enviar Resposta do Questionário</button>
         </form>
 
         <div id="quiz-result"></div>
+    </div>
+
+    <hr>
+
+    <!-- Simulado Interativo de Tipos de Dados -->
+    <h2 id="simulado-tipos">🧪 Simulado Interativo: Definição de Tipos de Dados em SQL Server - REVISÃO</h2>
+    <p>Selecione o tipo de dado SQL mais adequado para cada um dos <strong>10 campos</strong> listados abaixo com base na descrição de negócio do sistema PetShop:</p>
+
+    <div class="simulado-container">
+        <table class="simulado-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Campo</th>
+                    <th>Descrição do Dado</th>
+                    <th>Selecione o Tipo SQL correto</th>
+                    <th>Resultado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td><strong>Codigo (Cliente)</strong></td>
+                    <td>Identificador numérico inteiro e sequencial gerado pelo banco.</td>
+                    <td>
+                        <select id="sim-field-1">
+                            <option value="">-- Escolha --</option>
+                            <option value="INT">INT</option>
+                            <option value="VARCHAR">VARCHAR(100)</option>
+                            <option value="DECIMAL">DECIMAL(10,2)</option>
+                            <option value="DATE">DATE</option>
+                            <option value="DATETIME">DATETIME</option>
+                        </select>
+                    </td>
+                    <td id="sim-feedback-1" class="simulado-feedback">-</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><strong>Nome (Cliente)</strong></td>
+                    <td>Nome completo do cliente tutor (texto de tamanho variável).</td>
+                    <td>
+                        <select id="sim-field-2">
+                            <option value="">-- Escolha --</option>
+                            <option value="INT">INT</option>
+                            <option value="VARCHAR">VARCHAR(100)</option>
+                            <option value="DECIMAL">DECIMAL(10,2)</option>
+                            <option value="DATE">DATE</option>
+                            <option value="DATETIME">DATETIME</option>
+                        </select>
+                    </td>
+                    <td id="sim-feedback-2" class="simulado-feedback">-</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><strong>Cpf (Cliente)</strong></td>
+                    <td>Número de CPF formatado ex: '111.222.333-44' (texto com máscara).</td>
+                    <td>
+                        <select id="sim-field-3">
+                            <option value="">-- Escolha --</option>
+                            <option value="INT">INT</option>
+                            <option value="VARCHAR">VARCHAR(14)</option>
+                            <option value="DECIMAL">DECIMAL(10,2)</option>
+                            <option value="DATE">DATE</option>
+                            <option value="DATETIME">DATETIME</option>
+                        </select>
+                    </td>
+                    <td id="sim-feedback-3" class="simulado-feedback">-</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><strong>DataNascimento (Cliente)</strong></td>
+                    <td>Apenas a data de nascimento do cliente (sem horário).</td>
+                    <td>
+                        <select id="sim-field-4">
+                            <option value="">-- Escolha --</option>
+                            <option value="INT">INT</option>
+                            <option value="VARCHAR">VARCHAR(100)</option>
+                            <option value="DECIMAL">DECIMAL(10,2)</option>
+                            <option value="DATE">DATE</option>
+                            <option value="DATETIME">DATETIME</option>
+                        </select>
+                    </td>
+                    <td id="sim-feedback-4" class="simulado-feedback">-</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td><strong>Crmv (Veterinario)</strong></td>
+                    <td>Código do conselho ex: 'CRMV/SP 12345' (texto).</td>
+                    <td>
+                        <select id="sim-field-5">
+                            <option value="">-- Escolha --</option>
+                            <option value="INT">INT</option>
+                            <option value="VARCHAR">VARCHAR(20)</option>
+                            <option value="DECIMAL">DECIMAL(10,2)</option>
+                            <option value="DATE">DATE</option>
+                            <option value="DATETIME">DATETIME</option>
+                        </select>
+                    </td>
+                    <td id="sim-feedback-5" class="simulado-feedback">-</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td><strong>DataHora (ReservaServico)</strong></td>
+                    <td>Data e horário exato agendado para o atendimento.</td>
+                    <td>
+                        <select id="sim-field-6">
+                            <option value="">-- Escolha --</option>
+                            <option value="INT">INT</option>
+                            <option value="VARCHAR">VARCHAR(100)</option>
+                            <option value="DECIMAL">DECIMAL(10,2)</option>
+                            <option value="DATE">DATE</option>
+                            <option value="DATETIME">DATETIME</option>
+                        </select>
+                    </td>
+                    <td id="sim-feedback-6" class="simulado-feedback">-</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td><strong>Valor (ReservaServico)</strong></td>
+                    <td>Valor monetário do serviço em reais ex: 180.50 (precisão decimal).</td>
+                    <td>
+                        <select id="sim-field-7">
+                            <option value="">-- Escolha --</option>
+                            <option value="INT">INT</option>
+                            <option value="VARCHAR">VARCHAR(100)</option>
+                            <option value="DECIMAL">DECIMAL(10,2)</option>
+                            <option value="DATE">DATE</option>
+                            <option value="DATETIME">DATETIME</option>
+                        </select>
+                    </td>
+                    <td id="sim-feedback-7" class="simulado-feedback">-</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td><strong>StatusServico (ReservaServico)</strong></td>
+                    <td>Situação da reserva ex: 'Agendada', 'Realizada', 'Cancelada'.</td>
+                    <td>
+                        <select id="sim-field-8">
+                            <option value="">-- Escolha --</option>
+                            <option value="INT">INT</option>
+                            <option value="VARCHAR">VARCHAR(30)</option>
+                            <option value="DECIMAL">DECIMAL(10,2)</option>
+                            <option value="DATE">DATE</option>
+                            <option value="DATETIME">DATETIME</option>
+                        </select>
+                    </td>
+                    <td id="sim-feedback-8" class="simulado-feedback">-</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td><strong>ClienteId (FK ReservaServico)</strong></td>
+                    <td>Chave estrangeira que guarda o código do cliente (número inteiro).</td>
+                    <td>
+                        <select id="sim-field-9">
+                            <option value="">-- Escolha --</option>
+                            <option value="INT">INT</option>
+                            <option value="VARCHAR">VARCHAR(100)</option>
+                            <option value="DECIMAL">DECIMAL(10,2)</option>
+                            <option value="DATE">DATE</option>
+                            <option value="DATETIME">DATETIME</option>
+                        </select>
+                    </td>
+                    <td id="sim-feedback-9" class="simulado-feedback">-</td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td><strong>VeterinarioId (FK ReservaServico)</strong></td>
+                    <td>Chave estrangeira que guarda o código do veterinário (número inteiro).</td>
+                    <td>
+                        <select id="sim-field-10">
+                            <option value="">-- Escolha --</option>
+                            <option value="INT">INT</option>
+                            <option value="VARCHAR">VARCHAR(100)</option>
+                            <option value="DECIMAL">DECIMAL(10,2)</option>
+                            <option value="DATE">DATE</option>
+                            <option value="DATETIME">DATETIME</option>
+                        </select>
+                    </td>
+                    <td id="sim-feedback-10" class="simulado-feedback">-</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <button type="button" class="btn-submit" style="margin-top:20px;" onclick="verificarSimulado()">Enviar e Validar Tipos de Dados</button>
+
+        <div id="simulado-result"></div>
     </div>
 </div>
 
@@ -921,6 +1124,54 @@ public class ReservaServicoController : Controller
         } else {
             divResultado.className = "result-warning";
             divResultado.innerHTML = `⚠️ Você acertou <strong>${acertos}</strong> de <strong>${totalPerguntas}</strong> questões (${porcentagem}% de aproveitamento). Revise os tópicos do guia e tente novamente!`;
+        }
+
+        divResultado.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function verificarSimulado() {
+        const gabaritoSimulado = {
+            1: "INT",
+            2: "VARCHAR",
+            3: "VARCHAR",
+            4: "DATE",
+            5: "VARCHAR",
+            6: "DATETIME",
+            7: "DECIMAL",
+            8: "VARCHAR",
+            9: "INT",
+            10: "INT"
+        };
+
+        let acertos = 0;
+        let totalCampos = 10;
+
+        for (let i = 1; i <= totalCampos; i++) {
+            const select = document.getElementById(`sim-field-${i}`);
+            const feedback = document.getElementById(`sim-feedback-${i}`);
+            const valorSelecionado = select.value;
+
+            if (valorSelecionado === gabaritoSimulado[i]) {
+                acertos++;
+                feedback.className = "simulado-feedback text-correct";
+                feedback.innerHTML = "✓ Correto";
+            } else {
+                feedback.className = "simulado-feedback text-wrong";
+                feedback.innerHTML = `✗ Incorreto (Correto: ${gabaritoSimulado[i]})`;
+            }
+        }
+
+        const divResultado = document.getElementById("simulado-result");
+        divResultado.style.display = "block";
+
+        const porcentagem = (acertos / totalCampos) * 100;
+
+        if (acertos === totalCampos) {
+            divResultado.className = "result-success";
+            divResultado.innerHTML = `🏆 Excelente! Você acertou todos os <strong>${acertos}</strong> de <strong>${totalCampos}</strong> tipos de dados (${porcentagem}%). Seu esquema de banco de dados está perfeito!`;
+        } else {
+            divResultado.className = "result-warning";
+            divResultado.innerHTML = `📊 Você acertou <strong>${acertos}</strong> de <strong>${totalCampos}</strong> campos (${porcentagem}%). Confira as correções indicadas na tabela e tente novamente!`;
         }
 
         divResultado.scrollIntoView({ behavior: 'smooth' });
