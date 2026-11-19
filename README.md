@@ -1,173 +1,94 @@
-# 🚀 Guia Prático: SISTEMA CLINICA MÉDIA - AGENDAMENTO CONSULTA
+# 🚀 Guia Prático: SISTEMA CLÍNICA ODONTOLÓGICA - GESTÃO DE PROCEDIMENTOS E AGENDAMENTOS
 
-## 📌 Contexto do Projeto: Sistema de Gestão da Clínica Médica "Vida & Saúde"
+## 📌 Contexto do Projeto: Sistema da Clínica Odontológica "Sorriso & Saúde"
 
+A clínica odontológica **"Sorriso & Saúde"** precisa informatizar o gerenciamento de seus pacientes, procedimentos odontológicos e agendamentos de consultas. 
 
-A clínica médica "Vida & Saúde" precisa informatizar o atendimento de consultas para melhorar a organização da agenda diária. Atualmente, os pacientes ligam ou vão presencialmente à recepção para marcar horários com médicos de diversas especialidades.
-
-No sistema, um Paciente cadastra seus dados pessoais (Nome, CPF, Telefone e Data de Nascimento). O Médico possui seu cadastro contendo Nome, CRM e Especialidade. Uma Consulta representa o agendamento em si, onde é registrado o Paciente, o Médico responsável, a Data/Hora agendada e o Status do atendimento (Ex: Agendada, Realizada, Cancelada).
-
-O paciente só consegue fazer agendamento  se estiver logado.  Ao abrir o sistema a primeira tela é a de login, que deve conter abaixo também uma opção para a pessoa fazer o cadastro, caso ainda não tenha.
-
+Durante a reunião inicial com o gestor da clínica, foram definidas as seguintes necessidades para o sistema:
+* **Paciente:** Armazena os dados pessoais (Nome, CPF, Telefone e Data de Nascimento). O sistema deve permitir buscar pacientes por termo (nome ou CPF) e editar seus dados.
+* **Procedimento:** Representa o procedimento odontológico (Descrição, Valor, Observação) e **deve estar obrigatoriamente associado a um Paciente** previamente cadastrado.
+* **Agendamento:** Representa o agendamento da consulta, vinculando o **Paciente** e o **Procedimento** odontológico a uma **Data/Hora** e um **Status** (Ex: Agendada, Realizada, Cancelada). A listagem deve ser exibida **ordenada pela data da consulta**, permitindo também atualizar a data de um agendamento já cadastrado.
+* **Autenticação:** O acesso às funcionalidades principais exige autenticação com tempo de expiração (Sessão/Cookies). A tela principal deve exibir o nome do usuário logado, menu de acesso aos recursos e opção para sair do sistema.
 
 ---
 
 ## 🛠️ Pré-requisitos
-- Visual Studio 2022 (com suporte ao .NET 9 instado)
+- Visual Studio 2022 (com suporte ao .NET instalado)
 - Microsoft SQL Server e SQL Server Management Studio (SSMS)
 
 ---
 
-## 🗄️ Etapa 1: levantamento de Requisitos Funcionais
+## 🗄️ Etapa 1: Levantamento de Requisitos Funcionais
 
-Os requisitos funcionais estão atrelada ao negócio do usuário. Um exemplo, usuário só pode fazer agendmaento se estiver logado. Cada paciente só pode fazer um agendamento naquele dia.
-
-os requisitos funcionais são diferente dos requisitos não funcionais, pois os não funcionais refere-se, por exemplo, a definição de qual banco de dados usar, ou linguagem de programação.
-
-Então, com base em nosso contexto podemos definir a list a seguir como nossa lista inicial de requisitos funcionais.
+Os requisitos funcionais estão atrelados às regras de negócio definidas pelo gestor da clínica. Abaixo está a lista inicial de requisitos funcionais que guiarão o desenvolvimento:
 
 | ID | Requisito | Descrição |
 | :--- | :--- | :--- |
-| **R1** | Cadastro de Pacientes | O sistema deve permitir cadastrar, visualizar, atualizar e excluir (CRUD) os dados dos pacientes. |
-| **R2** | Cadastro de Médicos | O sistema deve permitir cadastrar, visualizar, atualizar e excluir (CRUD) os dados dos médicos (incluindo CRM e Especialidade). |
-| **R3** | Agendamento de Consulta | O sistema deve permitir agendar consultas vinculando obrigatoriamente 1 Paciente e 1 Médico a uma data/hora específica. |
-| **R4** | Controle de Status | Toda consulta deve iniciar com o status "Agendada", permitindo alteração para "Realizada" ou "Cancelada". |
-| **R5** | Integridade Relacional | Não deve ser possível excluir um paciente ou médico que já possua consultas vinculadas no histórico. |
-
-
-## 🗄️ Etapa 2: DER - DIGRAMA DE ENTIDADE E RELACIONAMENTO
-
-Com base no contexto  e requisitos podemos considerar a  imagem a seguir (DER) como ponto de partida para implementar nosso sistema.
-
-  ![DER](./imagens/der_clinica.png)
-
-ATENÇÃO
-No mercado do trabalho o imporante é focar no pedido solicitado. Se um gestor pede para implementar o DER acima, foque nessa entrega. Não é interessante criar outras tabelas e campos sem antes alinhar com a sua supervisão.
-
-
-Para crair o banco de dados você pode fazer via Script, ou via interface do SQL Server Management.
-
-Vamos fazer usando a proposta de intereface (cliques, tela).
-
-1. Abra o **SQL Server Management** e coloque as credencias de login e senha
-2. Ao lado esquerdo para criar o banco de dados clique com o botão direito em Banco de Dados e em seguida **Novo Banco de Dados**
-
-![Criando banco](./imagens/passo1_criarBanco.png)
-
-3. Defina o nome do banco de dados para **dbClinica** e depois confirme clicando em **ok**
-
-![Nome banco](./imagens/passo2_nomeBanco.png)
-
-4. Para verificar se o banco foi criado, expanda a visualização de banco clicando no sinal de + de banco de dados a esquerda e se ainda não apareceu clique no botão atualizar (azul)
-
-![Nome banco](./imagens/passo3_visualizarBanco.png)
-
-5. Para criar as tabelas vamos usar a opção visual **Criar Diagrama de Banco de Dados**. Clique com o botão direito nessa opção estando na visualiação do banco **dbClinica** e em seguida clique em **Novo Diagrama de Banco de Dados**
-
-![Criando diagrama](./imagens/passo4_criandoDiagrama.png)
-
-Atenção, se aparecer alguma mensagem pode confirmar **Sim**, ou ok. Também, deve aparecer uma tela para adicionar tabelas, mas como ainda não existe tabelas criadas estará vazias. Basta clicar em fechar.
-
-6. Para criar uma nova tabela clique com o botão direito em qualquer  lugar e clique em **Nova Tabela**. Em seguda vamos nomear essa tabela como **Paciente**
-
-![Nova Tabela](./imagens/passo5_novatabela.png)
-
-Nomei para paciente
-
-![Nome Paciente](./imagens/passo6_nomePaciente.png)
-
-7. Defina os nomes dos campos e seus tipos conforme imagem a seguir e que foi baseada no DER.
-
-![Nome colunas](./imagens/passo7_nomeCamposNoDER.png)
-
-Observe que todos os campos são obrigatório, por isso  **Permitir Nulos** está desmarcado para ele. No entanto, para o campo Codigo ele está marcado. Não se preocupe, por que esse campo iremos gerar o código de forma automatica e sequencial. Sendo assim, ele nunca ficará nulo.
-
-
-Atenção
-Importante você salvar as alterações clicando em Salvar ("disquete"). Como é a primeira vez será solicitado o nome que vocÊ quer ofertar ao Diagrama, coloque **DER Clinica**.
-
-![Der Clinica](./imagens/passo8_nomeDiagrama.png)
-
-8. Chave Primária. O campo codigo conforme contexto e DER será nossa chave primária e para garantir sistemáticamente que ele não se repita, clique com o botão direito em cima de **codigo** e em seguida clique em **Definir Chave Primária**
-
-![Der Chave Primária](./imagens/passo8_nomeDiagrama.png)
-
-
-ATENÇÃO
-!Ops. Se depois que você clicar em salvar, aparecer uma janela de alerta...
-
-![Alerta não Salva](./imagens/passo10_alertaNaoSalva.png)
-
-
- informando que não é possível salvar alterações. Faça as seguintes etapas.
-
-  8.2. Clique em ferramentas, opções. Na janela que for abertar clique na opção **Designers** e desmarque as opções de aviso e confirme. 
-  Clique novamente em salvar e vefique se o projeto foi salvo.
-
-![Opções avisos ](./imagens/passo11_ferramentasOpcoes.png)
-
-Observe que a chave amarela vai esta ao lado de código e o asterisco ao lado do nome Paciente também sumiu confirmando que todas as alterações foram salvas.
-
-![Salvo alterações](./imagens/passo12_salvochave.png)
-
-
-9. Código automático. Para que o código do Paciente seja inserido numeração automática. Você deve clicar com o botão direito em **Codigo** e em seguida, clica em **Propriedade**. Nas opções que abrir na parte direita da tela deixe as opções a seguir marcado com Sim e valor 1
-
-  - Especificação de Identidade = Sim
-    - (É identidade) = Sim
-    - Incremento de Identidade = 1
-    - Semente de Identidade = 1
-
-![Incrementar Código](./imagens/passo13_incrementarCodigo.png)
-
-
-10. Crie a tabela Medico e Consulta seguindo os passos feito para criarmos paciente.
-
-- ATENÇÃO!
-
-A tabela Consulta vai ter o campo PacienteID e MedicoID esses campos são do tipo inteiro e será passado manualmente. Não colocar identação.
-Quanto a forma de vincular esse campo a suas tabelas de origem (PacienteID com Codigo na taela Paciente) será mostrado no próximo passo.
-
-Depois de finalizado o seu digrama deve ficar similar a imagem abaixo:
-
-
-![DER no SQL](./imagens/passo14_DER_no_SQL.png)
-
-11. Integridade Referencia - Chave estrangeira
-
-O fato de você ter criado a tabela consulta com o campo PacienteId e colocar do tipo inteiro, não é o bastante para evitar, por exemplo, que um usuário colque um PacienteID com valor 100 e na tabela Paciente esse código não existir. Já imaginou na hora da consulta informar um código de paciente que não existe na tabela Paciente? Como resolver?
-
-Para resolver isso, vamos informar que o campo PacientID é uma chave estrangeira do campo Codigo na tabela Paciente.
-
-- Passo para ligar Codigo do Paciente a PacientID
-  Clique em cima da chave amarela ao lado do Codigo na tabela Paciente, seguro e arraste e solte em cima do campo PacientID na tabela Consulta.
-
-  Na janela que aparecer confirme que na esquerda (chave primária) está a tabela Paciente e o campo Codigo. Na parte da direita  (chave estrangeira) a tabela Consulta e o campo PacienteID
-
-  ![DER relacao pacienteID](./imagens/passo15_LigarChave.png)
-
-   Faça o mesmo processo para vincular o  Codigo do Médido  na tabela Médico com o campo MedicoID na tabela consulta
-
-
-  ![DER final no SQL](./imagens/passo16_DER_FinalNOSQL.png)
-
-
-  Atenção! Sempre vá salvando as alterações
-
-
-## 🗄️ Etapa 2B: CRIAÇAO DO BANCO DE DADOS COM SCRIPT
-
-
-Se você quiser pode rodar o script a seguir e ele irá criar o banco de dados e as tabelas com seus campos e relacionamento. E ainda, via insert vai inserir alguns dados.
-
+| **R1** | Autenticação e Controle de Acesso | O sistema deve possuir tela de login com validação de falha e tempo de expiração. A tela principal deve exibir o nome do usuário logado, menu de navegação e opção de sair. |
+| **R2** | CRUD e Busca de Pacientes | O sistema deve permitir cadastrar, visualizar, editar e excluir pacientes, além de disponibilizar um **campo de busca** na listagem para filtrar pacientes por termo informado. |
+| **R3** | CRUD de Procedimentos | O sistema deve permitir cadastrar, visualizar, editar e excluir procedimentos odontológicos, exigindo a associação obrigatória a um **Paciente** previamente cadastrado. |
+| **R4** | CRUD e Ordenação de Agendamentos | O sistema deve permitir agendar consultas vinculando **Paciente** e **Procedimento**, exibindo a listagem **ordenada pela data da consulta** e permitindo atualizar a data. |
+| **R5** | Integridade Relacional | Não deve ser possível excluir um paciente que possua procedimentos ou agendamentos vinculados, nem um procedimento vinculado a um agendamento. |
+
+---
+
+## 🗄️ Etapa 2: DER - Diagrama de Entidade e Relacionamento
+
+Com base no contexto e nas regras de negócio, nossa estrutura de banco de dados terá três tabelas principais:
+1. **Paciente** (`Codigo` PK, `Nome`, `Cpf`, `Telefone`, `DataNascimento`)
+2. **Procedimento** (`Codigo` PK, `Descricao`, `Valor`, `PacienteId` FK)
+3. **Agendamento** (`Codigo` PK, `DataHora`, `StatusAgendamento`, `PacienteId` FK, `ProcedimentoId` FK)
+
+> **ATENÇÃO:** No mercado de trabalho, o importante é focar no escopo solicitado. Implemente exatamente as tabelas, campos e relacionamentos definidos para atender às regras de negócio.
+
+### Passo a Passo para Criação via Interface (SSMS)
+
+1. Abra o **SQL Server Management Studio (SSMS)** e conecte-se ao seu servidor.
+2. Clique com o botão direito em **Bancos de Dados** > **Novo Banco de Dados**.
+3. Defina o nome como **`dbOdonto`** e clique em **OK**.
+4. Expanda o banco **`dbOdonto`**, clique com o botão direito em **Diagramas de Banco de Dados** > **Novo Diagrama de Banco de Dados** (confirme com *Sim* caso apareça um aviso e feche a janela de adicionar tabelas).
+5. **Criando a tabela `Paciente`:**
+   - Clique com o botão direito na área em branco > **Nova Tabela** > Nomeie como **`Paciente`**.
+   - Adicione as colunas:
+     - `Codigo` (`int`, desmarque Permitir Nulos, defina como **Chave Primária** e em Propriedades configure **Especificação de Identidade = Sim**, Incremento = 1, Semente = 1).
+     - `Nome` (`varchar(100)`, não nulo).
+     - `Cpf` (`varchar(14)`, não nulo).
+     - `Telefone` (`varchar(20)`, não nulo).
+     - `DataNascimento` (`date`, não nulo).
+6. **Criando a tabela `Procedimento`:**
+   - Crie uma nova tabela chamada **`Procedimento`**.
+   - Adicione as colunas:
+     - `Codigo` (`int`, Chave Primária com Identidade/Auto-incremento = Sim).
+     - `Descricao` (`varchar(100)`, não nulo).
+     - `Valor` (`decimal(10,2)`, não nulo).
+     - `PacienteId` (`int`, não nulo — *não colocar identidade neste campo*).
+7. **Criando a tabela `Agendamento`:**
+   - Crie uma nova tabela chamada **`Agendamento`**.
+   - Adicione as colunas:
+     - `Codigo` (`int`, Chave Primária com Identidade/Auto-incremento = Sim).
+     - `DataHora` (`datetime`, não nulo).
+     - `StatusAgendamento` (`varchar(30)`, não nulo).
+     - `PacienteId` (`int`, não nulo).
+     - `ProcedimentoId` (`int`, não nulo).
+8. **Criando os Relacionamentos (Chaves Estrangeiras):**
+   - Arraste a chave amarela de `Codigo` (tabela `Paciente`) e solte sobre `PacienteId` (tabela `Procedimento`). Confirme e clique em OK.
+   - Arraste a chave amarela de `Codigo` (tabela `Paciente`) e solte sobre `PacienteId` (tabela `Agendamento`). Confirme e clique em OK.
+   - Arraste a chave amarela de `Codigo` (tabela `Procedimento`) e solte sobre `ProcedimentoId` (tabela `Agendamento`). Confirme e clique em OK.
+9. Salve o diagrama com o nome **`DER_Odonto`**. *(Dica: Caso o SSMS bloqueie a alteração de tabelas salvas, vá em Ferramentas > Opções > Designers e desmarque "Impedir salvar alterações que exijam recriação da tabela").*
+
+---
+
+## 🗄️ Etapa 2B: Criação do Banco de Dados com Script SQL (Alternativa Rápida)
+
+Caso prefira criar toda a estrutura via código e já atender à regra de negócio que exige **pelo menos 3 registros inseridos em cada tabela**, execute o script abaixo no SSMS:
 
 ```sql
-CREATE DATABASE dbClinica;
+CREATE DATABASE dbOdonto;
 GO
-USE dbClinica;
+USE dbOdonto;
 GO
 
--- Tabela Paciente
+-- 1. Tabela Paciente
 CREATE TABLE Paciente (
     Codigo INT IDENTITY(1,1) PRIMARY KEY,
     Nome VARCHAR(100) NOT NULL,
@@ -177,132 +98,72 @@ CREATE TABLE Paciente (
 );
 GO
 
--- Tabela Medico
-CREATE TABLE Medico (
+-- 2. Tabela Procedimento (Associada obrigatoriamente a um Paciente)
+CREATE TABLE Procedimento (
     Codigo INT IDENTITY(1,1) PRIMARY KEY,
-    Nome VARCHAR(100) NOT NULL,
-    Crm VARCHAR(20) NOT NULL UNIQUE,
-    Especialidade VARCHAR(50) NOT NULL
+    Descricao VARCHAR(100) NOT NULL,
+    Valor DECIMAL(10,2) NOT NULL,
+    PacienteId INT NOT NULL,
+    CONSTRAINT FK_Procedimento_Paciente FOREIGN KEY (PacienteId) 
+        REFERENCES Paciente(Codigo)
 );
 GO
 
--- Tabela Consulta
-CREATE TABLE Consulta (
+-- 3. Tabela Agendamento (Associada ao Paciente e ao Procedimento)
+CREATE TABLE Agendamento (
     Codigo INT IDENTITY(1,1) PRIMARY KEY,
     DataHora DATETIME NOT NULL,
-    StatusConsulta VARCHAR(30) NOT NULL,
+    StatusAgendamento VARCHAR(30) NOT NULL,
     PacienteId INT NOT NULL,
-    MedicoId INT NOT NULL,
-    CONSTRAINT FK_Consulta_Paciente FOREIGN KEY (PacienteId) 
+    ProcedimentoId INT NOT NULL,
+    CONSTRAINT FK_Agendamento_Paciente FOREIGN KEY (PacienteId) 
         REFERENCES Paciente(Codigo),
-    CONSTRAINT FK_Consulta_Medico FOREIGN KEY (MedicoId) 
-        REFERENCES Medico(Codigo)
+    CONSTRAINT FK_Agendamento_Procedimento FOREIGN KEY (ProcedimentoId) 
+        REFERENCES Procedimento(Codigo)
 );
 GO
 
--- Inserindo Dados Iniciais para Teste
+-- Inserindo pelo menos 3 registros em cada tabela (Regra de Negócio)
 INSERT INTO Paciente (Nome, Cpf, Telefone, DataNascimento) VALUES 
 ('Maria Oliveira', '111.222.333-44', '(11) 98888-7777', '1990-05-15'),
-('João Souza', '555.666.777-88', '(11) 97777-6666', '1985-10-20');
+('João Souza', '555.666.777-88', '(11) 97777-6666', '1985-10-20'),
+('Ana Clara Costa', '999.888.777-66', '(11) 96666-5555', '1995-03-12');
+GO
 
-INSERT INTO Medico (Nome, Crm, Especialidade) VALUES 
-('Dra. Helena Rios', 'CRM/SP 123456', 'Cardiologia'),
-('Dr. Roberto Alves', 'CRM/SP 654321', 'Ortopedia');
+INSERT INTO Procedimento (Descricao, Valor, PacienteId) VALUES 
+('Limpeza e Profilaxia', 150.00, 1),
+('Restauração em Resina', 280.00, 2),
+('Clareamento Dental', 600.00, 3);
+GO
 
-INSERT INTO Consulta (DataHora, StatusConsulta, PacienteId, MedicoId) VALUES 
-('2026-10-15 14:00:00', 'Agendada', 1, 1),
-('2026-10-16 09:30:00', 'Agendada', 2, 2);
+INSERT INTO Agendamento (DataHora, StatusAgendamento, PacienteId, ProcedimentoId) VALUES 
+('2026-11-20 14:00:00', 'Agendada', 1, 1),
+('2026-11-18 09:30:00', 'Realizada', 2, 2),
+('2026-11-25 16:00:00', 'Agendada', 3, 3);
 GO
 ```
 
-### 📁 Importação de dados via Arquivo
+---
 
-Se você quiser, você pode importar os dados de 5 pacientes diretamente do arquivo **pacientes.csv** disponibilizado.
+## 📦 Etapa 3: Criação do Projeto ASP.NET Core MVC
 
-Siga os passos a seguir
+1. Abra o **Visual Studio 2022** e clique em **Criar um novo projeto**.
+2. Escolha o modelo **Aplicativo Web do ASP.NET Core (Model-View-Controller)** e clique em **Próximo**.
+3. Nomeie o projeto como **`appOdonto`** e clique em **Próximo**.
+4. Selecione o Framework **.NET 8.0** (ou superior instalado) e clique em **Criar**.
 
-1. Clique com o botão direito do mouse em seu banco de dados, depois escolha Tarefa e em seguidda Importar Dados.
-![Importar opção](./imagens/passoImportar_01_tarefaImportar.png)
+### Instalando os Pacotes NuGet
 
-2. Clique em avançar e na tela seguinte escolha:
-  - Fonte de dados: Flat File Source
-  - Nome do arquivo: clique em procurar, localize o arquivo **pacienres.csv** (se nao exibir mesmo estando na pasta, coloque a opção como todos os arquivos ao lado do nome)
-  - clique em próximo
-  
-![Importar defnir opções ](./imagens/passoImportar_02_arquivo.png)
+Clique com o botão direito no projeto `appOdonto` > **Gerenciar Pacotes NuGet** > aba **Procurar** e instale os três pacotes abaixo (na mesma versão principal do seu .NET):
+- `Microsoft.EntityFrameworkCore.SqlServer`
+- `Microsoft.EntityFrameworkCore.Tools`
+- `Microsoft.VisualStudio.Web.CodeGeneration.Design`
 
-3. Verifique se os dados estão organizados, o delimitado nesse caso é vírgula.
+---
 
-![Dados a importar](./imagens/passoImportar_03_dadosok.png)
+## ⚙️ Etapa 4: String de Conexão e Engenharia Reversa (Scaffolding)
 
-4. Destino
-   - escolha **Microsoft OLE DB Provider for SQL Server**
-   - nome do servidor: **.\SENAI**
-   - marque a opção: **Usar autenticação do SQL Server**
-   - usuário: **sa** ou seu usuário
-   - senha: **coloque a senha do seu sql**
-   - banco de dados: **dbClinica**
-
-![Destino dados](./imagens/passoImportar_04_destino.png)
-
-Ele já vai sugerir a tabela paciente, você pode alterar se desejar, ou caso não esteja correto.
-
-![Destino tabela](./imagens/passoImportar_05_destinotabela.png)
-
-Pode ir avançando e confirmar.
-
-Estando tudo certo se você usar o comando na consutla sql
-
-```sql
-select * from paciente
-```
-
-Irá retornar os pacientes.
-
-![select ](./imagens/passoImportar_06_tabelapacienes.png)
-
-
-
-
-
-### 📁 Criação do Projeto no Visual Studio
-
-
-Com nosso Banco de dados prontos, agora é a hora de criarmos o nosso preto no ASP.NET (Visual Studio)
-
-
-## 📦 Etapa 1: Criando O projeto ASP.NET
-
-- Abre o Visual Studio.
-
-- Clique em Criar um novo projeto.
-
-- Selecione o modelo Web do ASP.NET Core (Model-View-Controller) e clique em Próximo.
-
-- Defina o nome da solução (ex: appReversotask) e clique em Próximo.
-
-- Selecione o Framework .NET 7.0 (Suporte Técnico Padrão) e clique em Criar.
-
-
-## 📦 Etapa 2: Instalação dos Pacotes do Entity Framework
-
-- Microsoft.EntityFrameworkCore.SqlServer
-
-- Microsoft.EntityFrameworkCore.Tools
-
-- Microsoft.VisualStudio.Web.CodeGeneration.Design
-
-Para instalar você deve usar o Gerianciador de Pacote Nuget, cliando com o botão direito do mouse no nome do projeto e clicando em **Gerenciar Pacotes Nuget**.
-
-![Pacote Nugets](./imagens/passo17_nugets.png)
-
-A versão do pacote deve ser a mesma da versão .NET de seu projeto. Se no passo **Etapa 01 - criando o projeto ASP.NET** você escolheu 7.0 
-, na versão do pacote escolha a  maior versão da 7.. exemplo 7.x.x
-
-
-## ⚙️ Etapa 3: Configuração da String de Conexão no appsettings.json
-
-Abra o arquivo appsettings.json na raiz do projeto e configure a propriedade ConnectionStrings.
+1. Abra o arquivo **`appsettings.json`** na raiz do projeto e configure a conexão com o banco `dbOdonto`:
 
 ```json
 {
@@ -314,157 +175,187 @@ Abra o arquivo appsettings.json na raiz do projeto e configure a propriedade Con
   },
   "AllowedHosts": "*",
   "ConnectionStrings": {
-    "ConexaoSqlServer": "Server=.\\SENAI; Database=dbClinica; User Id=sa; Password=senai.123; TrustServerCertificate=True;"
+    "ConexaoSqlServer": "Server=.\\SQLEXPRESS; Database=dbOdonto; User Id=sa; Password=SUA_SENHA; TrustServerCertificate=True;"
   }
 }
 ```
+*(Nota: Ajuste `Server=.\\SQLEXPRESS` para o nome da sua instância SQL Server, como `.\\SENAI` ou `localhost`, ou utilize `Trusted_Connection=True;` caso use Autenticação do Windows).*
 
-Exemplo com Autenticação do Windows (Trusted Connection)
+2. Abra o **Console do Gerenciador de Pacotes** (*Ferramentas > Gerenciador de Pacotes do NuGet > Console do Gerenciador de Pacotes*) e execute o comando:
 
-```json
-"ConnectionStrings": {
-  "ConexaoSqlServer": "Server=\\SENAI; Database=dbClinica; Trusted_Connection=True; TrustServerCertificate=True;"
-}
-```
-
-
-## 🔨 Etapa 4: Engenharia Reversa - scaffolding update database
-
-Você deve abrir o **Console do Gerenciador de Pacotes** para executar o comando a seguir. 
-
-Ele irá fazer o mapeamento das tabelas e automaticamente irá crir a classe de contexto, que é responsável pelo 
-mapeamento das tabelas do banco em classses.
-
-![Gerencidor de pacote](./imagens/passo18_consolePacotes.png)
-
-Comando
-
-```json
-
+```powershell
 Scaffold-DbContext "Name=ConexaoSqlServer" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Force
-
 ```
 
-Observe também se dentro da pasta Models foi criado para cada tabela uma classe.
-Também, verifique qual o nome que foi dado a classe de Contexto, provalvelmente será DbClincaContext, mas pode ser outro nome. Procure a classe que tenha o sufixo a **context.**, vai ser ela.
+3. Verifique a pasta **`Models`**: devem ter sido criadas as classes `Paciente.cs`, `Procedimento.cs`, `Agendamento.cs` e `DbOdontoContext.cs`. *(Caso alguma classe fique no plural ou com nome diferente da tabela, ajuste para manter no singular).*
 
+4. **Registre o Contexto no `Program.cs`:** Abra o `Program.cs` e adicione o registro antes de `var app = builder.Build();`:
 
-![models](./imagens/passo19_models.png)
-
-Verifique se alguma classe (paciente, medico, consulta) ficou com o nome diferente, se sim, faça a alteração do nome para igualar ao da tabela.
-
-No caso da imagem acima, ao invés de **Consulta** foi criado **Consultum** . Altere o nome do arquivo da classe. Você também deve alterar o nome dentro da Classe DbClinicaContext. Resumo onde estiver **Consultum** alterar para **Consulta**.
-
-
-![consultamudar](./imagens/passo20_mudarConsulta.png)
-
-
-
-## 🔨 Etapa 5: Compilação Obrigatória da Solução
-Antes de gerar as telas e controllers, o projeto precisa estar limpo e compilado:
-
-- Pressione Ctrl + Shift + B ou clique com o botão direito na Solução e selecione Recompilar (Rebuild).
-
-
-## Etapa 6: Registro do DbContext na Injeção de Dependência (Program.cs)
-
-Para que o gerador de código consiga instanciar o banco sem erros de tempo de execução ou na geração do Scaffolding, registre o contexto no contêiner de dependências do .NET.
-
-Abra o arquivo Program.cs e insira o registro antes do var app = builder.Build();:
-
-```c#
+```csharp
 using Microsoft.EntityFrameworkCore;
-using appReverso.Models; // Subsitua pelo namespace real das suas Models
+using appOdonto.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Adicionar os serviços ao contêiner
 builder.Services.AddControllersWithViews();
 
-// Registrando o DbContext com a String de Conexão
-builder.Services.AddDbContext<DbClinicaContext>(options =>
+// Registrando o DbContext
+builder.Services.AddDbContext<DbOdontoContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ConexaoSqlServer")));
-
-var app = builder.Build();
 ```
 
+5. **Compile a solução** pressionando **`Ctrl + Shift + B`**.
 
+---
 
-## 🎨 Etapa 7: Gerando o CRUD Automático (Scaffolding MVC)
+## 🎨 Etapa 5: Gerando os CRUDs Automáticos (Scaffolding MVC)
 
-Agora vamos criar os **Controllers** e **Views Razor** sem digitar nenhuma linha de código manual:
+Agora vamos gerar as telas e controladores para **Paciente**, **Procedimento** e **Agendamento**:
 
-1. No **Gerenciador de Soluções**, clique com o botão direito na pasta `Controllers` > **Adicionar** > **Item do Scaffolding...** (ou *New Scaffolded Item...*).
-2. Selecione a opção **Controlador MVC com exibições, usando o Entity Framework** e clique em **Adicionar**.
-3. Na janela de configuração:
-   - **Classe de modelo:** Selecione `Paciente (appReverso.Models)`.
-   - **Classe do contexto de dados:** Selecione `DbClinicaContext (appReverso.Models)`.
-   - **Exibições:** Certifique-se de que a opção de gerar views esteja marcada.
+1. Clique com o botão direito na pasta **`Controllers`** > **Adicionar** > **Novo Item com Scaffold...**.
+2. Selecione **Controlador MVC com exibições, usando o Entity Framework** e clique em **Adicionar**.
+3. Configure:
+   - **Classe de modelo:** `Paciente (appOdonto.Models)`
+   - **Classe do contexto de dados:** `DbOdontoContext (appOdonto.Models)`
+   - **Nome do controlador:** `PacienteController` (mantenha no singular)
 4. Clique em **Adicionar**.
-5. Repita o mesmo procedimento para a classe de modelo `Medico` e `Consulta`.
+5. **Repita exatamente o mesmo processo** criando:
+   - `ProcedimentoController` (usando o modelo `Procedimento`)
+   - `AgendamentoController` (usando o modelo `Agendamento`)
 
-**ATENÇÃO**
-Deixe os nomes da controller no Singular
+> **Observação importante:** O Scaffolding já cria automaticamente o campo de seleção (`<select>`) para escolher o **Paciente** ao cadastrar um **Procedimento**, e para escolher o **Paciente** e o **Procedimento** ao criar um **Agendamento**!
 
-![Paciente controller](./imagens/passo22_pacienteController.png)
+---
 
+## 🔍 Etapa 6: Implementando a Caixa de Busca na Tela de Pacientes
 
+Para atender à regra de negócio que exige um **recurso de busca por termo na listagem de pacientes**, siga os passos abaixo no Controller e na View:
 
-## 🎯 Resultado Esperado
-O Visual Studio gerará automaticamente:
+### Passo 1: Alterar o método `Index` no `PacienteController.cs`
 
-- PacinteController.cs com as ações de Create, Read, Update, Delete (CRUD) prontas.
+Abra o arquivo `Controllers/PacienteController.cs` e localize o método `Index()`. Substitua-o pelo código abaixo para que ele receba o parâmetro `termoBusca`, filtre pelo Nome ou CPF e devolva o termo digitado para a tela:
 
-- As pastas Views/Paciente com os arquivos .cshtml correspondentes (Index, Create, Edit, Details, Delete).
+```csharp
+// GET: Paciente
+public async Task<IActionResult> Index(string termoBusca)
+{
+    // Guarda o termo pesquisado para manter preenchido na caixinha de busca
+    ViewData["FiltroAtual"] = termoBusca;
 
-![Paciente complete](./imagens/passo23_pacienteComViews.png)
+    // Prepara a consulta no banco sem executar ainda
+    var pacientes = from p in _context.Pacientes
+                    select p;
 
-Basta pressionar F5 para executar a aplicação e navegar até /Paciente para visualizar seu CRUD totalmente funcional conectado ao banco SQL Server! 🚀
+    // Se o usuário digitou algo na caixa de busca, aplica o filtro
+    if (!String.IsNullOrEmpty(termoBusca))
+    {
+        pacientes = pacientes.Where(p => p.Nome.Contains(termoBusca) 
+                                      || p.Cpf.Contains(termoBusca));
+    }
 
-![Paciente tela](./imagens/passo24_telaPaciente.png)
+    // Executa a consulta e envia a lista filtrada para a View
+    return View(await pacientes.ToListAsync());
+}
+```
 
-Repita o mesmo processo para Medico e Consulta
+### Passo 2: Adicionar o formulário de busca na View `Views/Paciente/Index.cshtml`
 
-## 🔒 Implementando Autenticação Simples com Session
+Abra o arquivo `Views/Paciente/Index.cshtml`. Logo abaixo do link `<a asp-action="Create">...</a>` e **antes da tag `<table>`**, adicione o formulário HTML com a caixa de texto e os botões de pesquisar e limpar:
 
-Para nível de treinamento vamos criar uma estrutura de autenticação login, usando sessões.
+```html
+<h1>Lista de Pacientes</h1>
 
-### 1. Criando a View Model de Login
+<p>
+    <a asp-action="Create" class="btn btn-success">Novo Paciente</a>
+</p>
 
-Dentro da pasta `Models`, crie uma nova classe chamada `LoginViewModel.cs`. Ela servirá para capturar os dados do formulário de login.
+<!-- Caixinha de Busca de Pacientes -->
+<form asp-action="Index" method="get" class="row g-2 mb-4">
+    <div class="col-md-6">
+        <input type="text" 
+               name="termoBusca" 
+               value="@ViewData["FiltroAtual"]" 
+               class="form-control" 
+               placeholder="Digite o nome ou CPF do paciente..." />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Limpar</a>
+    </div>
+</form>
+
+<table class="table">
+    <!-- Restante do código da tabela gerado pelo Scaffolding... -->
+```
+
+---
+
+## 📅 Etapa 7: Ordenando Agendamentos por Data e Melhorando a Exibição
+
+Conforme definido nas regras de negócio:
+1. A listagem de **Agendamentos** deve ser exibida **ordenada pela data da consulta** (`OrderBy`).
+2. Na tela de **Procedimentos** e **Agendamentos**, devemos exibir o **Nome** do Paciente e a **Descrição** do Procedimento (em vez de apenas o número do Código/ID).
+
+### 1. Ajustando `AgendamentoController.cs`
+
+Abra `Controllers/AgendamentoController.cs` e atualize o método `Index` para incluir os dados relacionados e ordenar por `DataHora`:
+
+```csharp
+// GET: Agendamento
+public async Task<IActionResult> Index()
+{
+    var agendamentosOrdenados = _context.Agendamentos
+        .Include(a => a.Paciente)
+        .Include(a => a.Procedimento)
+        .OrderBy(a => a.DataHora); // Ordena pela data da consulta (mais próxima primeiro)
+
+    return View(await agendamentosOrdenados.ToListAsync());
+}
+```
+*(Dica: Verifique também nos métodos `Create` e `Edit` do `AgendamentoController` e `ProcedimentoController` se o `SelectList` está mostrando o campo `Nome` do Paciente e `Descricao` do Procedimento: ex: `new SelectList(_context.Pacientes, "Codigo", "Nome")`)*
+
+### 2. Ajustando `Views/Agendamento/Index.cshtml`
+
+Na tabela de `Views/Agendamento/Index.cshtml`, certifique-se de exibir `@Html.DisplayFor(modelItem => item.Paciente.Nome)` e `@Html.DisplayFor(modelItem => item.Procedimento.Descricao)` nas colunas correspondentes.
+
+---
+
+## 🔒 Etapa 8: Implementando Autenticação com Tempo de Expiração (Session)
+
+Para proteger o sistema e exibir o nome do usuário logado na barra superior com opção de sair:
+
+### 1. Criar a `LoginViewModel.cs` na pasta `Models`
 
 ```csharp
 using System.ComponentModel.DataAnnotations;
 
-namespace appReverso.Models
+namespace appOdonto.Models
 {
     public class LoginViewModel
     {
         [Required(ErrorMessage = "O CPF é obrigatório.")]
-        [Display(Name = "CPF do Paciente")]
+        [Display(Name = "CPF de Acesso")]
         public string Cpf { get; set; } = string.Empty;
     }
 }
+```
 
-### 2. Criar Controller de Login
+### 2. Criar o `AccountController.cs` na pasta `Controllers`
 
-Clique com o botão direito na pasta Controllers > Adicionar > Controlador... > Escolha Controlador MVC - Vazio e nomeie como AccountController.cs.
-
-Adicione o código abaixo para gerenciar o Login e o Logout do paciente:
+Clique com o botão direito em `Controllers` > **Adicionar** > **Controlador** > **Controlador MVC - Vazio** (`AccountController.cs`):
 
 ```csharp
-using appReverso.Models;
+using appOdonto.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-
-namespace appReverso.Controllers
+namespace appOdonto.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly DbClinicaContext _context;
+        private readonly DbOdontoContext _context;
 
-        public AccountController(DbClinicaContext context)
+        public AccountController(DbOdontoContext context)
         {
             _context = context;
         }
@@ -472,7 +363,6 @@ namespace appReverso.Controllers
         [HttpGet]
         public IActionResult Login() => View();
 
-
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
@@ -483,351 +373,141 @@ namespace appReverso.Controllers
 
             if (paciente == null)
             {
-                ModelState.AddModelError("", "CPF não encontrado.");
+                ModelState.AddModelError("", "Falha na autenticação: CPF não encontrado.");
                 return View(model);
             }
 
-            // Salva na Session
-            HttpContext.Session.SetInt32("PacienteId", paciente.Codigo);
-            HttpContext.Session.SetString("PacienteNome", paciente.Nome);
+            // Salva os dados na Sessão
+            HttpContext.Session.SetInt32("UsuarioId", paciente.Codigo);
+            HttpContext.Session.SetString("UsuarioNome", paciente.Nome);
 
-            return RedirectToAction("Index", "Consulta");
+            return RedirectToAction("Index", "Agendamento");
         }
 
         public IActionResult Logout()
         {
-            HttpContext.Session.Clear(); // Limpa a sessão
+            HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
-
     }
 }
-
-A proposta aqui é que toda vez que o Login for válido, o CPF ele adicionar uma sessão no navegaor e salva o código e nome do paciente.
-
 ```
-### 3. Criar a ViewLogin
 
-  1. Dentro da pasta Views, crie uma nova pasta chamada Account.
-  2. Dentro de Views/Account, crie um arquivo Razor View chamado Login.cshtml com o seguinte conteúdo:
+### 3. Criar a View `Views/Account/Login.cshtml`
+
+Crie a pasta `Account` dentro de `Views` e adicione a View `Login.cshtml`:
 
 ```html
-@model appReverso.Models.LoginViewModel
+@model appOdonto.Models.LoginViewModel
 
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Login - Clínica Sorriso & Saúde";
 }
 
-<div class="col-md-4 mx-auto mt-4">
-    <h3 class="text-center">Acesso do Paciente</h3>
-
-    <form asp-action="Login" method="post">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-        <div class="mb-3">
-            <label asp-for="Cpf" class="form-label"></label>
-            <input asp-for="Cpf" class="form-control" placeholder="111.222.333-44" />
-            <span asp-validation-for="Cpf" class="text-danger"></span>
+<div class="col-md-4 mx-auto mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white text-center">
+            <h4>Clínica Sorriso & Saúde</h4>
+            <small>Acesso ao Sistema</small>
         </div>
+        <div class="card-body">
+            <form asp-action="Login" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
 
-        <button type="submit" class="btn btn-primary w-100 mb-2">Entrar</button>
-    </form>
+                <div class="mb-3">
+                    <label asp-for="Cpf" class="form-label"></label>
+                    <input asp-for="Cpf" class="form-control" placeholder="111.222.333-44" />
+                    <span asp-validation-for="Cpf" class="text-danger"></span>
+                </div>
 
-    <div class="text-center">
-        <a asp-controller="Paciente" asp-action="Create">Criar cadastro</a>
+                <button type="submit" class="btn btn-primary w-100 mb-2">Entrar</button>
+            </form>
+        </div>
+        <div class="card-footer text-center">
+            <a asp-controller="Paciente" asp-action="Create">Cadastrar novo paciente</a>
+        </div>
     </div>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }
-
 ```
 
-### 4. Ative a Session no  programa.cs
+### 4. Ativar a Session com Tempo de Expiração no `Program.cs`
+
+No arquivo `Program.cs`, adicione a configuração de sessão (com tempo de expiração de 20 minutos) e o `IHttpContextAccessor` para exibir o nome no menu:
 
 ```csharp
-// 1. Adicionar o serviço de Session (antes do var app = builder.Build())
+// Antes de var app = builder.Build();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.IdleTimeout = TimeSpan.FromMinutes(20); // Tempo de expiração da sessão
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
 
-
-
 var app = builder.Build();
 
-// 2. Ativar o Middleware de Session (depois do app.UseRouting())
+// Depois de app.UseRouting();
 app.UseRouting();
-app.UseSession(); 
+app.UseSession();
 app.UseAuthorization();
-
 ```
 
-### 5. Incluindo segurança em Consulta
+### 5. Proteger os Controllers (`PacienteController`, `ProcedimentoController` e `AgendamentoController`)
 
-Abra a ConsultaController.cs
-
-Na Index (ou no formulário de agendamento), você faz a verificação direta na Session, exemplo:
+Adicione a verificação de sessão no início das ações (ou sobrescrevendo `OnActionExecuting`) nos Controllers protegidos:
 
 ```csharp
-public async Task<IActionResult> Index()
+public override void OnActionExecuting(Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext context)
 {
-    // Verifica se a sessão existe
-    var pacienteId = HttpContext.Session.GetInt32("PacienteId");
-
-    if (pacienteId == null)
+    if (HttpContext.Session.GetInt32("UsuarioId") == null)
     {
-        // Se não estiver logado, redireciona para a tela de login
-        return RedirectToAction("Login", "Account");
+        context.Result = new RedirectToActionResult("Login", "Account", null);
     }
-
-    // Código normal da Index...
-    var consultas = await _context.Consultas
-        .Include(c => c.Medico)
-        .Include(c => c.Paciente)
-        .Where(c => c.PacienteId == pacienteId) // Mostra apenas as consultas do paciente logado!
-        .ToListAsync();
-
-    return View(consultas);
+    base.OnActionExecuting(context);
 }
-
 ```
+*(Dica: Se quiser permitir que alguém se cadastre sem estar logado, não coloque essa trava no `PacienteController` ou libere apenas as ações `Create` e `Index`).*
 
+### 6. Atualizando o Menu Principal (`Views/Shared/_Layout.cshtml`)
 
-
-
-
-
-
-
-
-
-## 🔒 (Opcional) Implementando Autenticação com Cookies e Autorize no ASP.NET (O ideial)
-
-Para atender ao requisito de negócio onde **o paciente só pode agendar consultas se estiver autenticado**, vamos criar um fluxo de login simplificado utilizando **Cookie Authentication** nativo do ASP.NET Core, onde o paciente se autentica informando apenas o seu **CPF**.
-
----
-
-### 1. Criando a View Model de Login
-
-Dentro da pasta `Models`, crie uma nova classe chamada `LoginViewModel.cs`. Ela servirá para capturar os dados do formulário de login.
-
-```csharp
-using System.ComponentModel.DataAnnotations;
-
-namespace appReverso.Models
-{
-    public class LoginViewModel
-    {
-        [Required(ErrorMessage = "O CPF é obrigatório.")]
-        [Display(Name = "CPF do Paciente")]
-        public string Cpf { get; set; } = string.Empty;
-    }
-}
-
-### 2. Criar Controller de Login
-
-Clique com o botão direito na pasta Controllers > Adicionar > Controlador... > Escolha Controlador MVC - Vazio e nomeie como AccountController.cs.
-
-Adicione o código abaixo para gerenciar o Login e o Logout do paciente:
-
-```csharp
-
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using appReverso.Models;
-
-namespace appReverso.Controllers
-{
-    public class AccountController : Controller
-    {
-        private readonly DbClinicaContext _context;
-
-        public AccountController(DbClinicaContext context)
-        {
-            _context = context;
-        }
-
-        // GET: /Account/Login
-        [HttpGet]
-        public IActionResult Login()
-        {
-            if (User.Identity != null && User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Index", "Consulta");
-            }
-            return View();
-        }
-
-        // POST: /Account/Login
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
-        {
-            if (!ModelState.IsValid) return View(model);
-
-            // Busca o paciente pelo CPF digitado
-            var paciente = await _context.Pacientes
-                .FirstOrDefaultAsync(p => p.Cpf == model.Cpf);
-
-            if (paciente == null)
-            {
-                ModelState.AddModelError("", "CPF não encontrado. Faça seu cadastro primeiro.");
-                return View(model);
-            }
-
-            // Criando os dados da sessão (Claims)
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, paciente.Codigo.ToString()),
-                new Claim(ClaimTypes.Name, paciente.Nome),
-                new Claim("CPF", paciente.Cpf)
-            };
-
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity));
-
-            return RedirectToAction("Index", "Consulta");
-        }
-
-        // GET: /Account/Logout
-        public async Task<IActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Login");
-        }
-    }
-}
-
-
-```
-
-### 3. Criar a ViewLogin
-
-  1. Dentro da pasta Views, crie uma nova pasta chamada Account.
-  2. Dentro de Views/Account, crie um arquivo Razor View chamado Login.cshtml com o seguinte conteúdo:
-
-  ```csharp
-    @model appReverso.Models.LoginViewModel
-
-    @{
-        ViewData["Title"] = "Acesso ao Sistema";
-    }
-
-    <div class="row justify-content-center mt-5">
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white text-center">
-                    <h4>Clínica Vida & Saúde</h4>
-                    <small>Acesso do Paciente</small>
-                </div>
-                <div class="card-body">
-                    <form asp-action="Login" method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                        <div class="form-group mb-3">
-                            <label asp-for="Cpf" class="form-label"></label>
-                            <input asp-for="Cpf" class="form-control" placeholder="Digite seu CPF (ex: 111.222.333-44)" />
-                            <span asp-validation-for="Cpf" class="text-danger"></span>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Entrar</button>
-                        </div>
-                    </form>
-                </div>
-                <div class="card-footer text-center">
-                    <p class="mb-0">Ainda não tem cadastro?</p>
-                    <a asp-controller="Paciente" asp-action="Create" class="btn btn-link">Cadastre-se aqui</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    @section Scripts {
-        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    }
-
-
-  ```
-
-### 4. Configurando a Autenticação por Cookies no Program.cs
-
-Abra o arquivo Program.cs e ative o serviço de autenticação por cookies.
-
-Insira a configuração antes de var app = builder.Build();
-
-```csharp
-
-using Microsoft.AspNetCore.Authentication.Cookies;
-
-// Configuração da Autenticação por Cookie
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Account/Login";
-        options.AccessDeniedPath = "/Account/Login";
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-    });
-
-```
-
-E ative os Middlewares de autenticação depois de app.UseRouting(); e antes de app.UseAuthorization();:
-
-```csharp
-
-app.UseRouting();
-
-// ATENÇÃO: Add estas duas linhas nesta ordem exata
-app.UseAuthentication(); 
-app.UseAuthorization();
-
-```
-
-### 5. Protegendo as Rotas com o atributo [Authorize]
-
-Agora que a infraestrutura de login está pronta, precisamos proteger a ConsultaController para proibir o acesso de pessoas não logadas.
-
-Abra o arquivo Controllers/ConsultaController.cs e adicione o atributo [Authorize] acima da classe:
-
-```csharp
-
-using Microsoft.AspNetCore.Authorization;
-
-namespace appReverso.Controllers
-{
-    [Authorize] // Impede o acesso de usuários não autenticados
-    public class ConsultaController : Controller
-    {
-        // Métodos do controller mantidos...
-    }
-}
-
-```
-
-### 6. Atualizando o Layout da Aplicação (_Layout.cshtml)
-Para que o usuário saiba quem está logado e consiga fazer o Logout, abra o arquivo Views/Shared/_Layout.cshtml e atualize a barra de navegação (<nav>):
+Abra `Views/Shared/_Layout.cshtml`, adicione `@using Microsoft.AspNetCore.Http` e `@inject IHttpContextAccessor HttpContextAccessor` no topo do arquivo, e atualize a barra de navegação (`<nav>`) para exibir o menu de recursos, o nome do usuário logado e o botão **Sair**:
 
 ```html
-<ul class="navbar-nav ms-auto">
-    @if (User.Identity != null && User.Identity.IsAuthenticated)
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+<!-- Dentro da <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between"> -->
+@{
+    var usuarioNome = HttpContextAccessor.HttpContext?.Session.GetString("UsuarioNome");
+}
+
+<ul class="navbar-nav flex-grow-1">
+    @if (!string.IsNullOrEmpty(usuarioNome))
     {
         <li class="nav-item">
-            <span class="nav-link text-dark">Olá, <strong>@User.Identity.Name</strong></span>
+            <a class="nav-link text-dark" asp-controller="Paciente" asp-action="Index">Pacientes</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-danger" asp-controller="Account" asp-action="Logout">Sair</a>
+            <a class="nav-link text-dark" asp-controller="Procedimento" asp-action="Index">Procedimentos</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Agendamento" asp-action="Index">Agendamentos</a>
+        </li>
+    }
+</ul>
+
+<ul class="navbar-nav ms-auto">
+    @if (!string.IsNullOrEmpty(usuarioNome))
+    {
+        <li class="nav-item">
+            <span class="nav-link text-primary">Olá, <strong>@usuarioNome</strong></span>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-danger fw-bold" asp-controller="Account" asp-action="Logout">Sair</a>
         </li>
     }
     else
@@ -837,14 +517,16 @@ Para que o usuário saiba quem está logado e consiga fazer o Logout, abra o arq
         </li>
     }
 </ul>
-
 ```
 
-### 7. 🎯 Testando o Fluxo Completo
+---
 
-1. Execute a aplicação (F5).
-2. Tente acessar a rota /Consulta. O ASP.NET Core irá redirecionar automaticamente para a tela de Login (/Account/Login).
-3. Digite o CPF de teste cadastrado no script SQL: 111.222.333-44 e clique em Entrar.
-4. Você será autenticado e redirecionado para a tela de agendamento de consultas!
-5. Se digitar um CPF inexistente, o sistema informará que o cadastro não foi encontrado e oferecerá o link de cadastro de novo paciente.
+## 🎯 Etapa 9: Checklist Final de Validação
 
+Execute o projeto (`F5`) e valide todas as entregas solicitadas:
+- [ ] Banco de dados criado com pelo menos **3 registros** em `Paciente`, `Procedimento` e `Agendamento`.
+- [ ] Tela de **Login** validando CPF inexistente e redirecionando após sucesso.
+- [ ] Barra superior exibindo **nome do usuário logado**, links para **Pacientes**, **Procedimentos**, **Agendamentos** e opção **Sair**.
+- [ ] Tela de **Pacientes** permitindo **buscar por termo**, cadastrar e **editar** dados.
+- [ ] Tela de **Procedimentos** obrigando a seleção de um **Paciente** cadastrado.
+- [ ] Tela de **Agendamentos** listando os registros **ordenados pela data da consulta**, exibindo os dados do Paciente e do Procedimento, e permitindo **editar a data** da consulta.
